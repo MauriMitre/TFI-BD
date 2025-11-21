@@ -246,6 +246,36 @@ function configurarPestanas() {
             // Activamos la pestaña seleccionada
             button.classList.add('active');
             document.getElementById(tabId).classList.add('active');
+            
+            // Si estamos activando la pestaña de nuevo pedido, recargamos los datos de los selectores
+            if (tabId === 'nuevoPedido') {
+                console.log("Recargando datos para el formulario de pedidos");
+                
+                // Actualizar los selectores de productos
+                document.querySelectorAll('.producto-select').forEach(select => {
+                    cargarProductosEnSelect(select);
+                });
+                
+                // Actualizar el selector de clientes
+                const selectCliente = document.getElementById('pedidoCliente');
+                selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
+                clientes.forEach(cliente => {
+                    const option = document.createElement('option');
+                    option.value = cliente.id;
+                    option.textContent = `${cliente.nombre} ${cliente.apellido}`;
+                    selectCliente.appendChild(option);
+                });
+                
+                // Actualizar el selector de sucursales
+                const selectSucursal = document.getElementById('pedidoSucursal');
+                selectSucursal.innerHTML = '<option value="">Seleccione una sucursal</option>';
+                sucursales.forEach(sucursal => {
+                    const option = document.createElement('option');
+                    option.value = sucursal.id;
+                    option.textContent = sucursal.nombre;
+                    selectSucursal.appendChild(option);
+                });
+            }
         });
     });
 }
@@ -257,6 +287,9 @@ function inicializarFormularios() {
     
     // Inicializar el formulario de nuevo producto
     inicializarFormularioProducto();
+    
+    // Inicializar el formulario de nueva categoría
+    inicializarFormularioCategoria();
     
     // Inicializar el formulario de nueva sucursal
     inicializarFormularioSucursal();
@@ -429,14 +462,32 @@ function inicializarFormularioPedido() {
 function cargarProductosEnSelect(select) {
     select.innerHTML = '<option value="">Seleccione un producto</option>';
     
+    console.log("Cargando productos en selector:", productos);
+    
+    if (productos.length === 0) {
+        console.warn("No hay productos disponibles para cargar en el selector");
+        const option = document.createElement('option');
+        option.value = "";
+        option.textContent = "No hay productos disponibles";
+        option.disabled = true;
+        select.appendChild(option);
+        return;
+    }
+    
     productos.forEach(producto => {
-        if (producto.estado === 'Disponible') {
-            const option = document.createElement('option');
-            option.value = producto.id;
-            option.textContent = `${producto.nombre} - $${producto.precio}`;
-            option.dataset.precio = producto.precio;
-            select.appendChild(option);
+        // Mostramos todos los productos, incluso los agotados
+        const option = document.createElement('option');
+        option.value = producto.id;
+        option.textContent = `${producto.nombre} - $${producto.precio}`;
+        
+        // Si está agotado, lo indicamos en el texto y lo deshabilitamos
+        if (producto.estado !== 'Disponible') {
+            option.textContent += ' (Agotado)';
+            option.disabled = true; // Deshabilitar productos agotados
         }
+        
+        option.dataset.precio = producto.precio;
+        select.appendChild(option);
     });
 }
 
@@ -513,6 +564,12 @@ function inicializarFormularioProducto() {
                     productos = resultadoProductos;
                     cargarTablaProductos(productos);
                     document.querySelector('.dashboard-card:nth-child(1) .dashboard-value').textContent = productos.length;
+                    
+                    // Actualizar los selectores de productos en el formulario de pedidos
+                    console.log("Actualizando selectores de productos después de agregar uno nuevo");
+                    document.querySelectorAll('.producto-select').forEach(select => {
+                        cargarProductosEnSelect(select);
+                    });
                 }
             } else {
                 alert('Error al agregar producto: ' + (resultado.error || 'Error desconocido'));
@@ -568,6 +625,28 @@ function inicializarFormularioSucursal() {
                     sucursales = resultadoSucursales;
                     cargarTablaSucursales(sucursales);
                     document.querySelector('.dashboard-card:nth-child(2) .dashboard-value').textContent = sucursales.length;
+                    
+                    // Actualizar los selectores de sucursales en otros formularios
+                    const selectPedidoSucursal = document.getElementById('pedidoSucursal');
+                    const selectEmpleadoSucursal = document.getElementById('empleadoSucursal');
+                    
+                    // Actualizar selector en formulario de pedidos
+                    selectPedidoSucursal.innerHTML = '<option value="">Seleccione una sucursal</option>';
+                    sucursales.forEach(sucursal => {
+                        const option = document.createElement('option');
+                        option.value = sucursal.id;
+                        option.textContent = sucursal.nombre;
+                        selectPedidoSucursal.appendChild(option);
+                    });
+                    
+                    // Actualizar selector en formulario de empleados
+                    selectEmpleadoSucursal.innerHTML = '<option value="">Seleccione una sucursal</option>';
+                    sucursales.forEach(sucursal => {
+                        const option = document.createElement('option');
+                        option.value = sucursal.id;
+                        option.textContent = sucursal.nombre;
+                        selectEmpleadoSucursal.appendChild(option);
+                    });
                 }
             } else {
                 alert('Error al agregar sucursal: ' + (resultado.error || 'Error desconocido'));
@@ -623,6 +702,17 @@ function inicializarFormularioCliente() {
                     clientes = resultadoClientes;
                     cargarTablaClientes(clientes);
                     document.querySelector('.dashboard-card:nth-child(4) .dashboard-value').textContent = clientes.length;
+                    
+                    // Actualizar el selector de clientes en el formulario de pedidos
+                    const selectCliente = document.getElementById('pedidoCliente');
+                    selectCliente.innerHTML = '<option value="">Seleccione un cliente</option>';
+                    
+                    clientes.forEach(cliente => {
+                        const option = document.createElement('option');
+                        option.value = cliente.id;
+                        option.textContent = `${cliente.nombre} ${cliente.apellido}`;
+                        selectCliente.appendChild(option);
+                    });
                 }
             } else {
                 alert('Error al agregar cliente: ' + (resultado.error || 'Error desconocido'));
@@ -631,6 +721,66 @@ function inicializarFormularioCliente() {
         } catch (error) {
             console.error('Error al enviar cliente:', error);
             alert('Error al agregar cliente. Por favor, intente nuevamente.');
+        }
+    });
+}
+
+function inicializarFormularioCategoria() {
+    // Configurar envío del formulario de categoría
+    document.getElementById('formCategoria').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const nombre = document.getElementById('categoriaNombre').value;
+            const descripcion = document.getElementById('categoriaDescripcion').value || '';
+            
+            // Preparar datos para enviar
+            const categoria = {
+                nombre: nombre,
+                descripcion: descripcion
+            };
+            
+            // Enviar al servidor
+            const respuesta = await fetch(`${API_URL}/categorias/nueva`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(categoria)
+            });
+            
+            const resultado = await respuesta.json();
+            
+            if (resultado.success) {
+                alert('Categoría agregada correctamente');
+                
+                // Limpiar formulario
+                document.getElementById('formCategoria').reset();
+                
+                // Actualizar la lista de categorías
+                const respuestaCategorias = await fetch(`${API_URL}/categorias`);
+                const resultadoCategorias = await respuestaCategorias.json();
+                if (Array.isArray(resultadoCategorias)) {
+                    categorias = resultadoCategorias;
+                    
+                    // Actualizar el selector de categorías en el formulario de productos
+                    const selectCategoria = document.getElementById('productoCategoria');
+                    selectCategoria.innerHTML = '<option value="">Seleccione una categoría</option>';
+                    
+                    categorias.forEach(categoria => {
+                        const option = document.createElement('option');
+                        option.value = categoria.id;
+                        option.textContent = categoria.nombre;
+                        selectCategoria.appendChild(option);
+                    });
+                }
+            } else {
+                alert('Error al agregar categoría: ' + (resultado.error || 'Error desconocido'));
+            }
+            
+        } catch (error) {
+            console.error('Error al enviar categoría:', error);
+            alert('Error al agregar categoría. Por favor, intente nuevamente.');
         }
     });
 }

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión del Sistema</title>
+    <link rel="stylesheet" href="../style/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Sistema de Gestión de Productos y Pedidos</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html#productos">Productos</a></li>
+                <li><a href="../index.html#sucursales">Sucursales</a></li>
+                <li><a href="../index.html#pedidos">Pedidos</a></li>
+                <li><a href="../index.html#clientes">Clientes</a></li>
+                <li><a href="gestion.html" class="active">Gestión</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="gestion">
+            <h2>Gestión del Sistema</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('nuevoPedido')">Nuevo Pedido</button>
+                <button class="tab-btn" onclick="openTab('nuevoProducto')">Nuevo Producto</button>
+                <button class="tab-btn" onclick="openTab('nuevaCategoria')">Nueva Categoría</button>
+                <button class="tab-btn" onclick="openTab('nuevaSucursal')">Nueva Sucursal</button>
+                <button class="tab-btn" onclick="openTab('nuevoCliente')">Nuevo Cliente</button>
+                <button class="tab-btn" onclick="openTab('nuevoEmpleado')">Nuevo Empleado</button>
+            </div>
+
+            <!-- Formulario para crear una nueva categoría -->
+            <div id="nuevaCategoria" class="tab-content">
+                <h3>Agregar Nueva Categoría</h3>
+                <form id="formCategoria">
+                    <div class="form-group">
+                        <label for="categoriaNombre">Nombre:</label>
+                        <input type="text" id="categoriaNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoriaDescripcion">Descripción:</label>
+                        <textarea id="categoriaDescripcion" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Categoría</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para crear un nuevo pedido -->
+            <div id="nuevoPedido" class="tab-content active">
+                <h3>Crear Nuevo Pedido</h3>
+                <form id="formPedido">
+                    <div class="form-group">
+                        <label for="pedidoCliente">Cliente:</label>
+                        <select id="pedidoCliente" required>
+                            <option value="">Seleccione un cliente</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoSucursal">Sucursal:</label>
+                        <select id="pedidoSucursal" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos:</label>
+                        <div id="productosContainer">
+                            <div class="producto-item">
+                                <select class="producto-select" aria-label="Seleccionar producto" required>
+                                    <option value="">Seleccione un producto</option>
+                                    <!-- Se cargará dinámicamente -->
+                                </select>
+                                <input type="number" class="producto-cantidad" placeholder="Cantidad" min="1" value="1" required>
+                                <button type="button" class="remove-producto" style="display: none;">Eliminar</button>
+                            </div>
+                        </div>
+                        <button type="button" id="agregarProducto">Agregar otro producto</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoTotal">Total:</label>
+                        <input type="text" id="pedidoTotal" disabled>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Crear Pedido</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para crear un nuevo producto -->
+            <div id="nuevoProducto" class="tab-content">
+                <h3>Agregar Nuevo Producto</h3>
+                <form id="formProducto">
+                    <div class="form-group">
+                        <label for="productoNombre">Nombre:</label>
+                        <input type="text" id="productoNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoCategoria">Categoría:</label>
+                        <select id="productoCategoria" required>
+                            <option value="">Seleccione una categoría</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoSKU">SKU:</label>
+                        <input type="text" id="productoSKU" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoPrecio">Precio Lista:</label>
+                        <input type="number" id="productoPrecio" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoEstado">Estado:</label>
+                        <select id="productoEstado" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Agotado">Agotado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Producto</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para crear una nueva sucursal -->
+            <div id="nuevaSucursal" class="tab-content">
+                <h3>Agregar Nueva Sucursal</h3>
+                <form id="formSucursal">
+                    <div class="form-group">
+                        <label for="sucursalNombre">Nombre:</label>
+                        <input type="text" id="sucursalNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalDireccion">Dirección:</label>
+                        <input type="text" id="sucursalDireccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalProvincia">Provincia:</label>
+                        <input type="text" id="sucursalProvincia" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalTelefono">Teléfono:</label>
+                        <input type="text" id="sucursalTelefono" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Sucursal</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para crear un nuevo cliente -->
+            <div id="nuevoCliente" class="tab-content">
+                <h3>Agregar Nuevo Cliente</h3>
+                <form id="formCliente">
+                    <div class="form-group">
+                        <label for="clienteNombre">Nombre:</label>
+                        <input type="text" id="clienteNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteApellido">Apellido:</label>
+                        <input type="text" id="clienteApellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteEmail">Email:</label>
+                        <input type="email" id="clienteEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteTelefono">Teléfono:</label>
+                        <input type="text" id="clienteTelefono" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Cliente</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para crear un nuevo empleado -->
+            <div id="nuevoEmpleado" class="tab-content">
+                <h3>Agregar Nuevo Empleado</h3>
+                <form id="formEmpleado">
+                    <div class="form-group">
+                        <label for="empleadoNombre">Nombre:</label>
+                        <input type="text" id="empleadoNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoApellido">Apellido:</label>
+                        <input type="text" id="empleadoApellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoCargo">Cargo:</label>
+                        <input type="text" id="empleadoCargo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoSucursal">Sucursal:</label>
+                        <select id="empleadoSucursal" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit">Agregar Empleado</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Sistema de Gestión - Trabajo Final Integrador de Bases de Datos</p>
+    </footer>
+
+    <!-- Cargamos el script principal -->
+    <script src="../script/script.js"></script>
+</body>
+</html>

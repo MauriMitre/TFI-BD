@@ -1,5 +1,5 @@
 const express = require('express');
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const app = express();
@@ -16,8 +16,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
-  password: 'Root',
-  database: 'TFI',
+  password: 'root',
+  database: 'tfi_bd',
   port: 3306 // Puerto por defecto de MySQL
 });
 
@@ -40,6 +40,9 @@ app.get('/api/productos', (req, res) => {
       res.status(500).json({ error: 'Error en la consulta' });
       return;
     }
+    // Mostramos el resultado en la consola para depuración
+    console.log('Productos obtenidos del procedimiento almacenado:', results[0]);
+    
     // Los resultados del procedimiento están en el primer conjunto de resultados
     res.json(results[0]);
   });
@@ -187,6 +190,31 @@ app.post('/api/empleados/nuevo', (req, res) => {
       res.json({ 
         success: true, 
         message: 'Empleado creado correctamente',
+        id: id
+      });
+    }
+  );
+});
+
+// Endpoint para crear una nueva categoría
+app.post('/api/categorias/nueva', (req, res) => {
+  const { nombre, descripcion } = req.body;
+  
+  connection.query('CALL sp_crear_categoria(?, ?)', 
+    [nombre, descripcion], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al llamar al procedimiento sp_crear_categoria:', err);
+        res.status(500).json({ error: 'Error al crear categoría', details: err.message });
+        return;
+      }
+      
+      // El ID de la nueva categoría está en results[0][0].id
+      const id = results[0][0]?.id || null;
+      
+      res.json({ 
+        success: true, 
+        message: 'Categoría creada correctamente',
         id: id
       });
     }
