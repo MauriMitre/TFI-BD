@@ -12,10 +12,14 @@
         <nav>
             <ul>
                 <li><a href="#productos">Productos</a></li>
+                <li><a href="#categorias">Categorías</a></li>
                 <li><a href="#sucursales">Sucursales</a></li>
-                <li><a href="#pedidos">Pedidos</a></li>
+                <li><a href="#pedidos">Pedidos/Ordenes de Compra</a></li>
+                <li><a href="#ordenes-compra">Órdenes</a></li>
                 <li><a href="#clientes">Clientes</a></li>
+                <li><a href="#personal">Personal</a></li>
                 <li><a href="pages/gestion.html">Gestión</a></li>
+                <li><a href="pages/modificar.html">Modificar</a></li>
             </ul>
         </nav>
     </header>
@@ -29,16 +33,24 @@
                     <p class="dashboard-value">120</p>
                 </div>
                 <div class="dashboard-card">
+                    <h3>Total Categorías</h3>
+                    <p class="dashboard-value">8</p>
+                </div>
+                <div class="dashboard-card">
                     <h3>Total Sucursales</h3>
                     <p class="dashboard-value">5</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>Pedidos Mensuales</h3>
+                    <h3>Pedidos/Ordenes de Compra</h3>
                     <p class="dashboard-value">45</p>
                 </div>
                 <div class="dashboard-card">
                     <h3>Clientes Registrados</h3>
                     <p class="dashboard-value">78</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>Personal Activo</h3>
+                    <p class="dashboard-value">15</p>
                 </div>
             </div>
         </section>
@@ -89,7 +101,7 @@
         </section>
 
         <section id="pedidos">
-            <h2>Pedidos</h2>
+            <h2>Pedidos / Ordenes de Compra</h2>
             <div class="search-container">
                 <input type="text" id="buscarPedido" placeholder="Buscar pedido...">
                 <button onclick="buscarPedido()">Buscar</button>
@@ -103,6 +115,26 @@
                         <th>Fecha</th>
                         <th>Total</th>
                         <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargarán con JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <section id="categorias">
+            <h2>Categorías</h2>
+            <div class="search-container">
+                <input type="text" id="buscarCategoria" placeholder="Buscar categoría...">
+                <button onclick="buscarCategoria()">Buscar</button>
+            </div>
+            <table id="tablaCategorias">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -131,6 +163,96 @@
                     <!-- Los datos se cargarán con JavaScript -->
                 </tbody>
             </table>
+        </section>
+
+        <section id="personal">
+            <h2>Personal</h2>
+            <div class="search-container">
+                <input type="text" id="buscarPersonal" placeholder="Buscar empleado...">
+                <button onclick="buscarPersonal()">Buscar</button>
+            </div>
+            <table id="tablaPersonal">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargarán con JavaScript -->
+                </tbody>
+            </table>
+        </section>
+
+        <section id="ordenes-compra">
+            <h2>Órdenes de Compra</h2>
+            <div class="search-container">
+                <input type="text" id="buscarOrden" placeholder="Buscar orden...">
+                <button onclick="buscarOrden()">Buscar</button>
+            </div>
+            <table id="tablaOrdenes">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Sucursal</th>
+                        <th>Fecha</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Ver Detalles</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Los datos se cargarán con JavaScript -->
+                </tbody>
+            </table>
+            <div id="detalleOrden" class="detalle-container" style="display: none;">
+                <h3>Detalles de la Orden</h3>
+                <div class="detalle-info">
+                    <div class="detalle-seccion">
+                        <h4>Información de Orden</h4>
+                        <p><strong>ID:</strong> <span id="orden-id"></span></p>
+                        <p><strong>Cliente:</strong> <span id="orden-cliente"></span></p>
+                        <p><strong>Sucursal:</strong> <span id="orden-sucursal"></span></p>
+                        <p><strong>Fecha:</strong> <span id="orden-fecha"></span></p>
+                        <p><strong>Estado:</strong> <span id="orden-estado"></span></p>
+                        <p><strong>Total:</strong> <span id="orden-total"></span></p>
+                    </div>
+                    
+                    <div class="detalle-seccion">
+                        <h4>Información de Pago</h4>
+                        <p><strong>Método:</strong> <span id="orden-metodo-pago"></span></p>
+                        <p><strong>Total Pagado:</strong> <span id="orden-total-pagado"></span></p>
+                        <p><strong>Moneda:</strong> <span id="orden-moneda"></span></p>
+                    </div>
+                    
+                    <div class="detalle-seccion" id="seccion-cripto" style="display: none;">
+                        <h4>Detalles Criptomoneda</h4>
+                        <p><strong>Moneda:</strong> <span id="cripto-moneda"></span></p>
+                        <p><strong>Hash Transacción:</strong> <span id="cripto-hash"></span></p>
+                        <p><strong>Wallet Cliente:</strong> <span id="cripto-wallet"></span></p>
+                    </div>
+                </div>
+                
+                <h4>Productos</h4>
+                <table id="tablaDetalleOrden">
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio Unitario</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los productos se cargarán con JavaScript -->
+                    </tbody>
+                </table>
+                <button id="cerrarDetalle" class="btn-cerrar">Cerrar Detalles</button>
+            </div>
         </section>
 
     </main>

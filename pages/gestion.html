@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión del Sistema</title>
     <link rel="stylesheet" href="../style/styles.css">
+    <link rel="stylesheet" href="../style/gestion.css">
 </head>
 <body>
     <header>
@@ -12,10 +13,14 @@
         <nav>
             <ul>
                 <li><a href="../index.html#productos">Productos</a></li>
+                <li><a href="../index.html#categorias">Categorías</a></li>
                 <li><a href="../index.html#sucursales">Sucursales</a></li>
-                <li><a href="../index.html#pedidos">Pedidos</a></li>
+                <li><a href="../index.html#pedidos">Pedidos / Ordenes de Compra</a></li>
+                <li><a href="../index.html#ordenes-compra">Órdenes</a></li>
                 <li><a href="../index.html#clientes">Clientes</a></li>
+                <li><a href="../index.html#personal">Personal</a></li>
                 <li><a href="gestion.html" class="active">Gestión</a></li>
+                <li><a href="modificar.html">Modificar</a></li>
             </ul>
         </nav>
     </header>
@@ -24,7 +29,7 @@
         <section id="gestion">
             <h2>Gestión del Sistema</h2>
             <div class="tabs">
-                <button class="tab-btn active" onclick="openTab('nuevoPedido')">Nuevo Pedido</button>
+                <button class="tab-btn active" onclick="openTab('nuevoPedido')">Nuevo Pedido / orden de Compra</button>
                 <button class="tab-btn" onclick="openTab('nuevoProducto')">Nuevo Producto</button>
                 <button class="tab-btn" onclick="openTab('nuevaCategoria')">Nueva Categoría</button>
                 <button class="tab-btn" onclick="openTab('nuevaSucursal')">Nueva Sucursal</button>
@@ -52,7 +57,7 @@
 
             <!-- Formulario para crear un nuevo pedido -->
             <div id="nuevoPedido" class="tab-content active">
-                <h3>Crear Nuevo Pedido</h3>
+                <h3>Crear Nuevo Pedido / orden de Compra</h3>
                 <form id="formPedido">
                     <div class="form-group">
                         <label for="pedidoCliente">Cliente:</label>
@@ -81,6 +86,32 @@
                             </div>
                         </div>
                         <button type="button" id="agregarProducto">Agregar otro producto</button>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoEstado">Estado:</label>
+                        <select id="pedidoEstado" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="Enviado">Enviado</option>
+                            <option value="Entregado">Entregado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoMetodoPago">Método de Pago:</label>
+                        <select id="pedidoMetodoPago" required>
+                            <option value="">Seleccione un método de pago</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoMoneda">Moneda:</label>
+                        <select id="pedidoMoneda" required>
+                            <option value="ARS">Pesos (ARS)</option>
+                            <option value="USD">Dólares (USD)</option>
+                            <option value="USDT">USDT</option>
+                            <option value="BTC">Bitcoin (BTC)</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="pedidoTotal">Total:</label>
@@ -123,6 +154,17 @@
                         </select>
                     </div>
                     <div class="form-group">
+                        <label for="productoSucursal">Sucursal:</label>
+                        <select id="productoSucursal" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoCantidad">Cantidad Inicial:</label>
+                        <input type="number" id="productoCantidad" min="0" value="20" required>
+                    </div>
+                    <div class="form-group">
                         <button type="submit">Agregar Producto</button>
                     </div>
                 </form>
@@ -158,6 +200,8 @@
             <div id="nuevoCliente" class="tab-content">
                 <h3>Agregar Nuevo Cliente</h3>
                 <form id="formCliente">
+                    <fieldset>
+                        <legend>Información del Cliente</legend>
                     <div class="form-group">
                         <label for="clienteNombre">Nombre:</label>
                         <input type="text" id="clienteNombre" required>
@@ -174,6 +218,40 @@
                         <label for="clienteTelefono">Teléfono:</label>
                         <input type="text" id="clienteTelefono" required>
                     </div>
+                    </fieldset>
+                    
+                    <fieldset>
+                        <legend>Dirección de Envío</legend>
+                        <div class="form-group">
+                            <label for="clienteDireccionCalle">Calle:</label>
+                            <input type="text" id="clienteDireccionCalle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccionNumero">Número:</label>
+                            <input type="text" id="clienteDireccionNumero" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccionCiudad">Ciudad:</label>
+                            <input type="text" id="clienteDireccionCiudad" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccionProvincia">Provincia:</label>
+                            <input type="text" id="clienteDireccionProvincia" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccionPais">País:</label>
+                            <input type="text" id="clienteDireccionPais" value="Argentina" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="clienteDireccionAlias">Alias:</label>
+                            <input type="text" id="clienteDireccionAlias" value="Casa" placeholder="Ej: Casa, Trabajo, etc.">
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <input type="checkbox" id="clienteDireccionPrincipal" checked>
+                            <label for="clienteDireccionPrincipal">Es dirección principal</label>
+                        </div>
+                    </fieldset>
+                    
                     <div class="form-group">
                         <button type="submit">Agregar Cliente</button>
                     </div>
@@ -215,7 +293,7 @@
         <p>Sistema de Gestión - Trabajo Final Integrador de Bases de Datos</p>
     </footer>
 
-    <!-- Cargamos el script principal -->
-    <script src="../script/script.js"></script>
+    <!-- Cargamos el script específico para gestión -->
+    <script src="../script/gestion.js"></script>
 </body>
 </html>

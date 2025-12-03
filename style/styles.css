@@ -100,7 +100,15 @@ h3 {
 }
 
 .dashboard-card:nth-child(4) {
+    border-top: 4px solid #FF9800;
+}
+
+.dashboard-card:nth-child(5) {
     border-top: 4px solid #E91E63;
+}
+
+.dashboard-card:nth-child(6) {
+    border-top: 4px solid #9C27B0;
 }
 
 .dashboard-card:hover {
@@ -245,6 +253,25 @@ button:hover {
     background-color: #0055a5;
 }
 
+.btn-ver-detalle {
+    background-color: #4CAF50;
+    padding: 0.5rem;
+    font-size: 0.85rem;
+}
+
+.btn-ver-detalle:hover {
+    background-color: #3e8e41;
+}
+
+.btn-cerrar {
+    background-color: #9E9E9E;
+    margin-top: 1rem;
+}
+
+.btn-cerrar:hover {
+    background-color: #757575;
+}
+
 .producto-item {
     display: flex;
     gap: 0.5rem;
@@ -272,6 +299,40 @@ button:hover {
 
 #agregarProducto:hover {
     background-color: #3e8e41;
+}
+
+/* Estilos para detalles de orden */
+.detalle-container {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+    border: 1px solid #e0e0e0;
+}
+
+.detalle-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.detalle-seccion {
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.detalle-seccion h4 {
+    color: #0066cc;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.detalle-seccion p {
+    margin-bottom: 0.5rem;
 }
 
 /* Media queries para responsive design */
@@ -305,5 +366,9 @@ button:hover {
 
     .tab-btn.active {
         border-bottom: 1px solid #ddd;
+    }
+    
+    .detalle-info {
+        grid-template-columns: 1fr;
     }
 }

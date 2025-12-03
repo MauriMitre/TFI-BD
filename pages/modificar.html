@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modificar y Eliminar Datos</title>
+    <link rel="stylesheet" href="../style/styles.css">
+    <style>
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .buttons-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn-guardar {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        
+        .btn-eliminar {
+            background-color: #F44336;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Sistema de Gestión de Productos y Pedidos</h1>
+        <nav>
+            <ul>
+                <li><a href="../index.html#productos">Productos</a></li>
+                <li><a href="../index.html#sucursales">Sucursales</a></li>
+                <li><a href="../index.html#pedidos">Pedidos</a></li>
+                <li><a href="../index.html#clientes">Clientes</a></li>
+                <li><a href="gestion.html">Gestión</a></li>
+                <li><a href="modificar.html" class="active">Modificar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="gestion">
+            <h2>Modificar y Eliminar Datos</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="openTab('modificarProducto')">Productos</button>
+                <button class="tab-btn" onclick="openTab('modificarCategoria')">Categorías</button>
+                <button class="tab-btn" onclick="openTab('modificarSucursal')">Sucursales</button>
+                <button class="tab-btn" onclick="openTab('modificarCliente')">Clientes</button>
+                <button class="tab-btn" onclick="openTab('modificarEmpleado')">Empleados</button>
+                <button class="tab-btn" onclick="openTab('modificarPedido')">Pedidos</button>
+            </div>
+
+            <!-- Formulario para modificar productos -->
+            <div id="modificarProducto" class="tab-content active">
+                <h3>Modificar o Eliminar Producto</h3>
+                <div class="search-container">
+                    <input type="text" id="productoBuscar" placeholder="Nombre o SKU del producto">
+                    <button type="button" id="btnBuscarProducto">Buscar</button>
+                </div>
+                <form id="formModificarProducto">
+                    <div class="form-group">
+                        <label for="productoSeleccionado">Seleccionar producto:</label>
+                        <select id="productoSeleccionado" required>
+                            <option value="">Seleccione un producto</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoNombre">Nombre:</label>
+                        <input type="text" id="productoNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoCategoria">Categoría:</label>
+                        <select id="productoCategoria" required>
+                            <option value="">Seleccione una categoría</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoSKU">SKU:</label>
+                        <input type="text" id="productoSKU" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoPrecio">Precio:</label>
+                        <input type="number" id="productoPrecio" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="productoEstado">Estado:</label>
+                        <select id="productoEstado" required>
+                            <option value="Disponible">Disponible</option>
+                            <option value="Agotado">Agotado</option>
+                        </select>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarProducto" class="btn-eliminar">Eliminar Producto</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para modificar categorías -->
+            <div id="modificarCategoria" class="tab-content">
+                <h3>Modificar o Eliminar Categoría</h3>
+                <div class="search-container">
+                    <input type="text" id="categoriaBuscar" placeholder="Nombre de la categoría">
+                    <button type="button" id="btnBuscarCategoria">Buscar</button>
+                </div>
+                <form id="formModificarCategoria">
+                    <div class="form-group">
+                        <label for="categoriaSeleccionada">Seleccionar categoría:</label>
+                        <select id="categoriaSeleccionada" required>
+                            <option value="">Seleccione una categoría</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoriaNombre">Nombre:</label>
+                        <input type="text" id="categoriaNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="categoriaDescripcion">Descripción:</label>
+                        <textarea id="categoriaDescripcion" rows="3"></textarea>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarCategoria" class="btn-eliminar">Eliminar Categoría</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para modificar sucursales -->
+            <div id="modificarSucursal" class="tab-content">
+                <h3>Modificar o Eliminar Sucursal</h3>
+                <div class="search-container">
+                    <input type="text" id="sucursalBuscar" placeholder="Nombre o dirección de la sucursal">
+                    <button type="button" id="btnBuscarSucursal">Buscar</button>
+                </div>
+                <form id="formModificarSucursal">
+                    <div class="form-group">
+                        <label for="sucursalSeleccionada">Seleccionar sucursal:</label>
+                        <select id="sucursalSeleccionada" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalNombre">Nombre:</label>
+                        <input type="text" id="sucursalNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalDireccion">Dirección:</label>
+                        <input type="text" id="sucursalDireccion" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalProvincia">Provincia:</label>
+                        <input type="text" id="sucursalProvincia" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sucursalTelefono">Teléfono:</label>
+                        <input type="text" id="sucursalTelefono" required>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarSucursal" class="btn-eliminar">Eliminar Sucursal</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para modificar clientes -->
+            <div id="modificarCliente" class="tab-content">
+                <h3>Modificar o Eliminar Cliente</h3>
+                <div class="search-container">
+                    <input type="text" id="clienteBuscar" placeholder="Nombre, apellido o email del cliente">
+                    <button type="button" id="btnBuscarCliente">Buscar</button>
+                </div>
+                <form id="formModificarCliente">
+                    <div class="form-group">
+                        <label for="clienteSeleccionado">Seleccionar cliente:</label>
+                        <select id="clienteSeleccionado" required>
+                            <option value="">Seleccione un cliente</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteNombre">Nombre:</label>
+                        <input type="text" id="clienteNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteApellido">Apellido:</label>
+                        <input type="text" id="clienteApellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteEmail">Email:</label>
+                        <input type="email" id="clienteEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="clienteTelefono">Teléfono:</label>
+                        <input type="text" id="clienteTelefono" required>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarCliente" class="btn-eliminar">Eliminar Cliente</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para modificar empleados -->
+            <div id="modificarEmpleado" class="tab-content">
+                <h3>Modificar o Eliminar Empleado</h3>
+                <div class="search-container">
+                    <input type="text" id="empleadoBuscar" placeholder="Nombre o apellido del empleado">
+                    <button type="button" id="btnBuscarEmpleado">Buscar</button>
+                </div>
+                <form id="formModificarEmpleado">
+                    <div class="form-group">
+                        <label for="empleadoSeleccionado">Seleccionar empleado:</label>
+                        <select id="empleadoSeleccionado" required>
+                            <option value="">Seleccione un empleado</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoNombre">Nombre:</label>
+                        <input type="text" id="empleadoNombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoApellido">Apellido:</label>
+                        <input type="text" id="empleadoApellido" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoCargo">Cargo:</label>
+                        <input type="text" id="empleadoCargo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoSucursal">Sucursal:</label>
+                        <select id="empleadoSucursal" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarEmpleado" class="btn-eliminar">Eliminar Empleado</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Formulario para modificar pedidos -->
+            <div id="modificarPedido" class="tab-content">
+                <h3>Modificar o Eliminar Pedido</h3>
+                <div class="search-container">
+                    <input type="text" id="pedidoBuscar" placeholder="Cliente o número de pedido">
+                    <button type="button" id="btnBuscarPedido">Buscar</button>
+                </div>
+                <form id="formModificarPedido">
+                    <div class="form-group">
+                        <label for="pedidoSeleccionado">Seleccionar pedido:</label>
+                        <select id="pedidoSeleccionado" required>
+                            <option value="">Seleccione un pedido</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoCliente">Cliente:</label>
+                        <select id="pedidoCliente" required>
+                            <option value="">Seleccione un cliente</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoSucursal">Sucursal:</label>
+                        <select id="pedidoSucursal" required>
+                            <option value="">Seleccione una sucursal</option>
+                            <!-- Se cargará dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoFecha">Fecha:</label>
+                        <input type="date" id="pedidoFecha" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoEstado">Estado:</label>
+                        <select id="pedidoEstado" required>
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En proceso">En proceso</option>
+                            <option value="Enviado">Enviado</option>
+                            <option value="Entregado">Entregado</option>
+                            <option value="Cancelado">Cancelado</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Productos:</label>
+                        <div id="productosContainer">
+                            <!-- Se cargarán dinámicamente los productos del pedido -->
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="pedidoTotal">Total:</label>
+                        <input type="text" id="pedidoTotal" disabled>
+                    </div>
+                    <div class="buttons-container">
+                        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                        <button type="button" id="btnEliminarPedido" class="btn-eliminar">Eliminar Pedido</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Sistema de Gestión - Trabajo Final Integrador de Bases de Datos</p>
+    </footer>
+
+    <!-- Cargamos el script principal y los específicos para modificar -->
+    <script src="../script/script.js"></script>
+    <script src="../script/modificar.js"></script>
+</body>
+</html>

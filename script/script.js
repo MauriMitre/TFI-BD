@@ -7,7 +7,10 @@ let sucursales = [];
 let clientes = [];
 let pedidos = [];
 let categorias = [];
-let empleados = [];
+let personal = [];
+let ordenes = [];
+let metodosPago = [];
+let ordenPagos = [];
 
 // Función para cargar los datos en las tablas
 document.addEventListener('DOMContentLoaded', async function() {
@@ -20,6 +23,16 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (Array.isArray(resultadoProductos)) {
             productos = resultadoProductos;
             cargarTablaProductos(productos);
+            console.log(`Productos cargados: ${productos.length}`);
+        }
+        
+        // Cargamos categorías 
+        const respuestaCategorias = await fetch(`${API_URL}/categorias`);
+        const resultadoCategorias = await respuestaCategorias.json();
+        if (Array.isArray(resultadoCategorias)) {
+            categorias = resultadoCategorias;
+            cargarTablaCategorias(categorias);
+            console.log(`Categorías cargadas: ${categorias.length}`);
         }
         
         // Cargamos sucursales
@@ -28,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (Array.isArray(resultadoSucursales)) {
             sucursales = resultadoSucursales;
             cargarTablaSucursales(sucursales);
+            console.log(`Sucursales cargadas: ${sucursales.length}`);
         }
         
         // Cargamos pedidos con cliente y sucursal
@@ -36,6 +50,18 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (Array.isArray(resultadoPedidos)) {
             pedidos = resultadoPedidos;
             cargarTablaPedidos(pedidos);
+            console.log(`Pedidos cargados: ${pedidos.length}`);
+        }
+
+        // Cargamos órdenes de compra
+        const respuestaOrdenes = await fetch(`${API_URL}/ordenesCompra`);
+        const resultadoOrdenes = await respuestaOrdenes.json();
+        if (Array.isArray(resultadoOrdenes)) {
+            ordenes = resultadoOrdenes;
+            cargarTablaOrdenes(ordenes);
+            console.log(`Órdenes cargadas: ${ordenes.length}`);
+        } else {
+            console.error('Error: ordenesCompra no es un array', resultadoOrdenes);
         }
         
         // Cargamos clientes
@@ -44,20 +70,34 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (Array.isArray(resultadoClientes)) {
             clientes = resultadoClientes;
             cargarTablaClientes(clientes);
+            console.log(`Clientes cargados: ${clientes.length}`);
         }
-        
-        // Cargamos categorías para los formularios
-        const respuestaCategorias = await fetch(`${API_URL}/categorias`);
-        const resultadoCategorias = await respuestaCategorias.json();
-        if (Array.isArray(resultadoCategorias)) {
-            categorias = resultadoCategorias;
+
+        // Cargamos personal
+        const respuestaPersonal = await fetch(`${API_URL}/personal`);
+        const resultadoPersonal = await respuestaPersonal.json();
+        if (Array.isArray(resultadoPersonal)) {
+            personal = resultadoPersonal;
+            cargarTablaPersonal(personal);
+            console.log(`Personal cargado: ${personal.length}`);
+        } else {
+            console.error('Error: personal no es un array', resultadoPersonal);
+        }
+
+        // Cargamos métodos de pago para uso interno
+        const respuestaMetodos = await fetch(`${API_URL}/metodosPago`);
+        const resultadoMetodos = await respuestaMetodos.json();
+        if (Array.isArray(resultadoMetodos)) {
+            metodosPago = resultadoMetodos;
         }
         
         // Actualizamos los contadores del dashboard
         document.querySelector('.dashboard-card:nth-child(1) .dashboard-value').textContent = productos.length;
-        document.querySelector('.dashboard-card:nth-child(2) .dashboard-value').textContent = sucursales.length;
-        document.querySelector('.dashboard-card:nth-child(3) .dashboard-value').textContent = pedidos.length;
-        document.querySelector('.dashboard-card:nth-child(4) .dashboard-value').textContent = clientes.length;
+        document.querySelector('.dashboard-card:nth-child(2) .dashboard-value').textContent = categorias.length;
+        document.querySelector('.dashboard-card:nth-child(3) .dashboard-value').textContent = sucursales.length;
+        document.querySelector('.dashboard-card:nth-child(4) .dashboard-value').textContent = pedidos.length;
+        document.querySelector('.dashboard-card:nth-child(5) .dashboard-value').textContent = clientes.length;
+        document.querySelector('.dashboard-card:nth-child(6) .dashboard-value').textContent = personal.length;
         
         // Inicializamos los formularios
         inicializarFormularios();
@@ -96,6 +136,11 @@ function cargarTablaProductos(datos) {
 
 function cargarTablaSucursales(datos) {
     const tabla = document.getElementById('tablaSucursales').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de sucursales');
+        return;
+    }
+    
     tabla.innerHTML = '';
     
     datos.forEach(sucursal => {
@@ -108,8 +153,30 @@ function cargarTablaSucursales(datos) {
     });
 }
 
+function cargarTablaCategorias(datos) {
+    const tabla = document.getElementById('tablaCategorias').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de categorías');
+        return;
+    }
+    
+    tabla.innerHTML = '';
+    
+    datos.forEach(categoria => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = categoria.id;
+        fila.insertCell(1).textContent = categoria.nombre;
+        fila.insertCell(2).textContent = categoria.descripcion || '-';
+    });
+}
+
 function cargarTablaPedidos(datos) {
     const tabla = document.getElementById('tablaPedidos').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de pedidos');
+        return;
+    }
+    
     tabla.innerHTML = '';
     
     datos.forEach(pedido => {
@@ -134,8 +201,92 @@ function cargarTablaPedidos(datos) {
     });
 }
 
+function cargarTablaPersonal(datos) {
+    const tabla = document.getElementById('tablaPersonal').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de personal');
+        return;
+    }
+    
+    tabla.innerHTML = '';
+    
+    datos.forEach(empleado => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = empleado.id;
+        fila.insertCell(1).textContent = empleado.nombre;
+        fila.insertCell(2).textContent = empleado.apellido;
+        fila.insertCell(3).textContent = empleado.email;
+        fila.insertCell(4).textContent = empleado.rol;
+    });
+}
+
+function cargarTablaOrdenes(datos) {
+    const tabla = document.getElementById('tablaOrdenes').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de órdenes de compra');
+        return;
+    }
+    
+    tabla.innerHTML = '';
+    
+    datos.forEach(orden => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = orden.id;
+        fila.insertCell(1).textContent = orden.cliente;
+        fila.insertCell(2).textContent = orden.sucursal;
+        fila.insertCell(3).textContent = orden.fecha;
+        fila.insertCell(4).textContent = '$' + orden.total;
+        
+        const celdaEstado = fila.insertCell(5);
+        celdaEstado.textContent = orden.estado;
+        if (orden.estado === 'Entregado') {
+            celdaEstado.style.color = '#4CAF50';
+        } else if (orden.estado === 'Enviado') {
+            celdaEstado.style.color = '#2196F3';
+        } else if (orden.estado === 'En proceso') {
+            celdaEstado.style.color = '#FF9800';
+        } else if (orden.estado === 'Cancelado') {
+            celdaEstado.style.color = '#F44336';
+        } else {
+            celdaEstado.style.color = '#9E9E9E';
+        }
+        
+        const celdaAcciones = fila.insertCell(6);
+        const btnVerDetalle = document.createElement('button');
+        btnVerDetalle.textContent = 'Ver';
+        btnVerDetalle.className = 'btn-ver-detalle';
+        btnVerDetalle.addEventListener('click', () => verDetalleOrden(orden.id));
+        celdaAcciones.appendChild(btnVerDetalle);
+    });
+    
+    // Configurar el evento para cerrar los detalles
+    const btnCerrar = document.getElementById('cerrarDetalle');
+    if (btnCerrar) {
+        btnCerrar.addEventListener('click', () => {
+            document.getElementById('detalleOrden').style.display = 'none';
+        });
+    }
+}
+
+function cargarTablaCategorias(datos) {
+    const tabla = document.getElementById('tablaCategorias').getElementsByTagName('tbody')[0];
+    tabla.innerHTML = '';
+    
+    datos.forEach(categoria => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = categoria.id;
+        fila.insertCell(1).textContent = categoria.nombre;
+        fila.insertCell(2).textContent = categoria.descripcion || '-';
+    });
+}
+
 function cargarTablaClientes(datos) {
     const tabla = document.getElementById('tablaClientes').getElementsByTagName('tbody')[0];
+    if (!tabla) {
+        console.error('No se encontró la tabla de clientes');
+        return;
+    }
+    
     tabla.innerHTML = '';
     
     datos.forEach(cliente => {
@@ -146,6 +297,130 @@ function cargarTablaClientes(datos) {
         fila.insertCell(3).textContent = cliente.email;
         fila.insertCell(4).textContent = cliente.telefono;
     });
+}
+
+function cargarTablaPersonal(datos) {
+    const tabla = document.getElementById('tablaPersonal').getElementsByTagName('tbody')[0];
+    tabla.innerHTML = '';
+    
+    datos.forEach(empleado => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = empleado.id;
+        fila.insertCell(1).textContent = empleado.nombre;
+        fila.insertCell(2).textContent = empleado.apellido;
+        fila.insertCell(3).textContent = empleado.email;
+        fila.insertCell(4).textContent = empleado.rol;
+    });
+}
+
+function cargarTablaOrdenes(datos) {
+    const tabla = document.getElementById('tablaOrdenes').getElementsByTagName('tbody')[0];
+    tabla.innerHTML = '';
+    
+    datos.forEach(orden => {
+        const fila = tabla.insertRow();
+        fila.insertCell(0).textContent = orden.id;
+        fila.insertCell(1).textContent = orden.cliente;
+        fila.insertCell(2).textContent = orden.sucursal;
+        fila.insertCell(3).textContent = orden.fecha;
+        fila.insertCell(4).textContent = '$' + orden.total;
+        
+        const celdaEstado = fila.insertCell(5);
+        celdaEstado.textContent = orden.estado;
+        if (orden.estado === 'Entregado') {
+            celdaEstado.style.color = '#4CAF50';
+        } else if (orden.estado === 'Enviado') {
+            celdaEstado.style.color = '#2196F3';
+        } else if (orden.estado === 'En proceso') {
+            celdaEstado.style.color = '#FF9800';
+        } else if (orden.estado === 'Cancelado') {
+            celdaEstado.style.color = '#F44336';
+        } else {
+            celdaEstado.style.color = '#9E9E9E';
+        }
+        
+        const celdaAcciones = fila.insertCell(6);
+        const btnVerDetalle = document.createElement('button');
+        btnVerDetalle.textContent = 'Ver';
+        btnVerDetalle.className = 'btn-ver-detalle';
+        btnVerDetalle.addEventListener('click', () => verDetalleOrden(orden.id));
+        celdaAcciones.appendChild(btnVerDetalle);
+    });
+    
+    // Configurar el evento para cerrar los detalles
+    document.getElementById('cerrarDetalle').addEventListener('click', () => {
+        document.getElementById('detalleOrden').style.display = 'none';
+    });
+}
+
+async function verDetalleOrden(ordenId) {
+    try {
+        // Obtener detalles de la orden
+        const respuesta = await fetch(`${API_URL}/ordenesCompra/${ordenId}`);
+        const detalleOrden = await respuesta.json();
+        
+        if (detalleOrden) {
+            // Cargar información básica de la orden
+            document.getElementById('orden-id').textContent = detalleOrden.id;
+            document.getElementById('orden-cliente').textContent = detalleOrden.cliente;
+            document.getElementById('orden-sucursal').textContent = detalleOrden.sucursal;
+            document.getElementById('orden-fecha').textContent = detalleOrden.fecha;
+            document.getElementById('orden-estado').textContent = detalleOrden.estado;
+            document.getElementById('orden-total').textContent = '$' + detalleOrden.total;
+            
+            // Cargar información del pago
+            if (detalleOrden.pago) {
+                document.getElementById('orden-metodo-pago').textContent = detalleOrden.pago.metodo;
+                document.getElementById('orden-total-pagado').textContent = '$' + detalleOrden.pago.total_pagado;
+                document.getElementById('orden-moneda').textContent = detalleOrden.pago.moneda;
+                
+                // Si hay información de criptomoneda, mostrarla
+                if (detalleOrden.pago.cripto) {
+                    document.getElementById('seccion-cripto').style.display = 'block';
+                    document.getElementById('cripto-moneda').textContent = detalleOrden.pago.cripto.moneda;
+                    document.getElementById('cripto-hash').textContent = detalleOrden.pago.cripto.hash;
+                    document.getElementById('cripto-wallet').textContent = detalleOrden.pago.cripto.wallet_cliente;
+                } else {
+                    document.getElementById('seccion-cripto').style.display = 'none';
+                }
+            } else {
+                document.getElementById('orden-metodo-pago').textContent = 'No disponible';
+                document.getElementById('orden-total-pagado').textContent = 'No disponible';
+                document.getElementById('orden-moneda').textContent = 'No disponible';
+                document.getElementById('seccion-cripto').style.display = 'none';
+            }
+            
+            // Cargar productos de la orden
+            const tablaDetalleBody = document.getElementById('tablaDetalleOrden').getElementsByTagName('tbody')[0];
+            tablaDetalleBody.innerHTML = '';
+            
+            if (detalleOrden.productos && detalleOrden.productos.length > 0) {
+                detalleOrden.productos.forEach(prod => {
+                    const fila = tablaDetalleBody.insertRow();
+                    fila.insertCell(0).textContent = prod.nombre;
+                    fila.insertCell(1).textContent = prod.cantidad;
+                    fila.insertCell(2).textContent = '$' + prod.precio_unitario;
+                    fila.insertCell(3).textContent = '$' + (prod.cantidad * prod.precio_unitario).toFixed(2);
+                });
+            } else {
+                const fila = tablaDetalleBody.insertRow();
+                const celdaVacia = fila.insertCell(0);
+                celdaVacia.textContent = 'No hay productos asociados a esta orden';
+                celdaVacia.colSpan = 4;
+                celdaVacia.style.textAlign = 'center';
+            }
+            
+            // Mostrar el panel de detalles
+            document.getElementById('detalleOrden').style.display = 'block';
+            
+        } else {
+            alert('No se encontraron detalles para esta orden');
+        }
+        
+    } catch (error) {
+        console.error('Error al obtener detalles de la orden:', error);
+        alert('Error al cargar los detalles de la orden. Por favor, intente nuevamente.');
+    }
 }
 
 // Funciones de búsqueda
@@ -188,6 +463,69 @@ function buscarSucursal() {
                  OR provincia LIKE '%${terminoBusqueda}%'`);
 }
 
+function buscarCategoria() {
+    const terminoBusqueda = document.getElementById('buscarCategoria').value.toLowerCase();
+    
+    // Filtramos las categorías cargadas desde la API
+    const categoriasFiltradas = categorias.filter(categoria => 
+        categoria.nombre.toLowerCase().includes(terminoBusqueda) || 
+        (categoria.descripcion && categoria.descripcion.toLowerCase().includes(terminoBusqueda))
+    );
+    
+    cargarTablaCategorias(categoriasFiltradas);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT id_Categoria as id, Nombre as nombre, Descripcion as descripcion
+                 FROM categoria 
+                 WHERE Nombre LIKE '%${terminoBusqueda}%' OR Descripcion LIKE '%${terminoBusqueda}%'`);
+}
+
+function buscarPersonal() {
+    const terminoBusqueda = document.getElementById('buscarPersonal').value.toLowerCase();
+    
+    // Filtramos el personal cargado desde la API
+    const personalFiltrado = personal.filter(empleado => 
+        empleado.nombre.toLowerCase().includes(terminoBusqueda) || 
+        empleado.apellido.toLowerCase().includes(terminoBusqueda) || 
+        empleado.email.toLowerCase().includes(terminoBusqueda) || 
+        empleado.rol.toLowerCase().includes(terminoBusqueda)
+    );
+    
+    cargarTablaPersonal(personalFiltrado);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT p.id_Personal as id, p.nombre, p.apellido, p.email, r.nombre as rol
+                 FROM personal p
+                 JOIN rol_personal r ON p.rol_id = r.id_Rol
+                 WHERE p.nombre LIKE '%${terminoBusqueda}%' OR p.apellido LIKE '%${terminoBusqueda}%' 
+                 OR p.email LIKE '%${terminoBusqueda}%' OR r.nombre LIKE '%${terminoBusqueda}%'`);
+}
+
+function buscarOrden() {
+    const terminoBusqueda = document.getElementById('buscarOrden').value.toLowerCase();
+    
+    // Filtramos las órdenes cargadas desde la API
+    const ordenesFiltradas = ordenes.filter(orden => 
+        orden.cliente.toLowerCase().includes(terminoBusqueda) || 
+        orden.sucursal.toLowerCase().includes(terminoBusqueda) || 
+        orden.estado.toLowerCase().includes(terminoBusqueda) ||
+        orden.id.toString().includes(terminoBusqueda)
+    );
+    
+    cargarTablaOrdenes(ordenesFiltradas);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT o.id_Orden AS id, 
+                 CONCAT(c.nombre, ' ', c.apellido) AS cliente,
+                 s.nombre AS sucursal, o.fecha, o.total, o.canal, o.estado
+                 FROM orden_de_compra o
+                 JOIN cliente c ON o.cliente_id = c.id_Cliente
+                 JOIN sucursal s ON o.sucursalOrigen_id = s.id_Sucursal
+                 WHERE CONCAT(c.nombre, ' ', c.apellido) LIKE '%${terminoBusqueda}%' 
+                 OR s.nombre LIKE '%${terminoBusqueda}%' OR o.estado LIKE '%${terminoBusqueda}%'
+                 OR o.id_Orden LIKE '%${terminoBusqueda}%'`);
+}
+
 function buscarPedido() {
     const terminoBusqueda = document.getElementById('buscarPedido').value.toLowerCase();
     
@@ -211,6 +549,23 @@ function buscarPedido() {
                  OR s.nombre LIKE '%${terminoBusqueda}%' OR o.estado LIKE '%${terminoBusqueda}%'`);
 }
 
+function buscarCategoria() {
+    const terminoBusqueda = document.getElementById('buscarCategoria').value.toLowerCase();
+    
+    // Filtramos las categorías cargadas desde la API
+    const categoriasFiltradas = categorias.filter(categoria => 
+        categoria.nombre.toLowerCase().includes(terminoBusqueda) || 
+        (categoria.descripcion && categoria.descripcion.toLowerCase().includes(terminoBusqueda))
+    );
+    
+    cargarTablaCategorias(categoriasFiltradas);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT id_Categoria as id, Nombre as nombre, Descripcion as descripcion
+                 FROM categoria 
+                 WHERE Nombre LIKE '%${terminoBusqueda}%' OR Descripcion LIKE '%${terminoBusqueda}%'`);
+}
+
 function buscarCliente() {
     const terminoBusqueda = document.getElementById('buscarCliente').value.toLowerCase();
     
@@ -228,6 +583,52 @@ function buscarCliente() {
                  FROM cliente 
                  WHERE nombre LIKE '%${terminoBusqueda}%' OR apellido LIKE '%${terminoBusqueda}%' 
                  OR email LIKE '%${terminoBusqueda}%'`);
+}
+
+function buscarPersonal() {
+    const terminoBusqueda = document.getElementById('buscarPersonal').value.toLowerCase();
+    
+    // Filtramos el personal cargado desde la API
+    const personalFiltrado = personal.filter(empleado => 
+        empleado.nombre.toLowerCase().includes(terminoBusqueda) || 
+        empleado.apellido.toLowerCase().includes(terminoBusqueda) || 
+        empleado.email.toLowerCase().includes(terminoBusqueda) || 
+        empleado.rol.toLowerCase().includes(terminoBusqueda)
+    );
+    
+    cargarTablaPersonal(personalFiltrado);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT p.id_Personal as id, p.nombre, p.apellido, p.email, r.nombre as rol
+                 FROM personal p
+                 JOIN rol_personal r ON p.rol_id = r.id_Rol
+                 WHERE p.nombre LIKE '%${terminoBusqueda}%' OR p.apellido LIKE '%${terminoBusqueda}%' 
+                 OR p.email LIKE '%${terminoBusqueda}%' OR r.nombre LIKE '%${terminoBusqueda}%'`);
+}
+
+function buscarOrden() {
+    const terminoBusqueda = document.getElementById('buscarOrden').value.toLowerCase();
+    
+    // Filtramos las órdenes cargadas desde la API
+    const ordenesFiltradas = ordenes.filter(orden => 
+        orden.cliente.toLowerCase().includes(terminoBusqueda) || 
+        orden.sucursal.toLowerCase().includes(terminoBusqueda) || 
+        orden.estado.toLowerCase().includes(terminoBusqueda) ||
+        orden.id.toString().includes(terminoBusqueda)
+    );
+    
+    cargarTablaOrdenes(ordenesFiltradas);
+    
+    // Mostramos la consulta SQL que se ejecutaría en un entorno real
+    console.log(`SQL ejecutado en el servidor: SELECT o.id_Orden AS id, 
+                 CONCAT(c.nombre, ' ', c.apellido) AS cliente,
+                 s.nombre AS sucursal, o.fecha, o.total, o.canal, o.estado
+                 FROM orden_de_compra o
+                 JOIN cliente c ON o.cliente_id = c.id_Cliente
+                 JOIN sucursal s ON o.sucursalOrigen_id = s.id_Sucursal
+                 WHERE CONCAT(c.nombre, ' ', c.apellido) LIKE '%${terminoBusqueda}%' 
+                 OR s.nombre LIKE '%${terminoBusqueda}%' OR o.estado LIKE '%${terminoBusqueda}%'
+                 OR o.id_Orden LIKE '%${terminoBusqueda}%'`);
 }
 
 // Función para manejar pestañas
