@@ -895,16 +895,24 @@ function inicializarFormularioEmpleado() {
         try {
             const nombre = document.getElementById('empleadoNombre').value;
             const apellido = document.getElementById('empleadoApellido').value;
-            const email = nombre.toLowerCase() + '.' + apellido.toLowerCase() + '@empresa.com';
-            const cargo = document.getElementById('empleadoCargo').value;
-            const rolId = 1; // Asignamos un rol por defecto (asegúrate de que existe este ID)
+            const email = document.getElementById('empleadoEmail').value;
+            const rolId = document.getElementById('empleadoRol').value;
+            let sucursalId = document.getElementById('empleadoSucursal').value;
+            // Si no se selecciona una sucursal, enviamos una cadena vacía que el backend convertirá a null
+            sucursalId = sucursalId ? sucursalId : '';
+            
+            if (!nombre || !apellido || !email || !rolId) {
+                alert('Por favor, complete todos los campos obligatorios');
+                return;
+            }
             
             // Preparar datos para enviar
             const empleado = {
                 nombre: nombre,
                 apellido: apellido,
                 email: email,
-                rol_id: rolId
+                rol_id: rolId,
+                sucursal_id: sucursalId
             };
             
             // Enviar al servidor

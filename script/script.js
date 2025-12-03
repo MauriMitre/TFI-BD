@@ -12,6 +12,60 @@ let ordenes = [];
 let metodosPago = [];
 let ordenPagos = [];
 
+// Función para mostrar mensajes del sistema
+function mostrarMensajeSistema(tipo, mensaje, duracion = 5000, detalles = null) {
+    const mensajeElement = document.getElementById('mensajeSistema');
+    if (!mensajeElement) return;
+    
+    // Eliminar todas las clases
+    mensajeElement.classList.remove('success', 'error', 'info');
+    
+    // Añadir la clase según el tipo
+    mensajeElement.classList.add(tipo);
+    
+    // Preparar el contenido HTML del mensaje
+    let contenidoHTML = mensaje;
+    
+    // Si es un error y hay detalles, añadirlos
+    if (tipo === 'error' && detalles) {
+        contenidoHTML += `<div class="mensaje-detalles">${detalles}</div>`;
+    }
+    
+    // Si es un error, añadir un botón para ver más detalles en la consola
+    if (tipo === 'error') {
+        mensajeElement.innerHTML = `
+            <div>${mensaje}</div>
+            ${detalles ? `<div class="mensaje-detalles">${detalles}</div>` : ''}
+            <div class="mensaje-footer">
+                <button onclick="console.log('Detalles del error:', ${JSON.stringify(mensaje)})" class="btn-detalles">
+                    Ver detalles técnicos en la consola
+                </button>
+            </div>
+        `;
+    } else {
+        // Para mensajes normales, simplemente establecer el texto
+        mensajeElement.textContent = mensaje;
+    }
+    
+    // Mostrar el elemento
+    mensajeElement.style.display = 'block';
+    
+    // Hacer scroll al principio para que sea visible
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Para errores, mantener el mensaje visible por más tiempo
+    const tiempoMostrado = tipo === 'error' ? 10000 : duracion;
+    
+    // Ocultar el mensaje después de la duración especificada
+    setTimeout(() => {
+        mensajeElement.style.opacity = '0';
+        setTimeout(() => {
+            mensajeElement.style.display = 'none';
+            mensajeElement.style.opacity = '1';
+        }, 500);
+    }, tiempoMostrado);
+}
+
 // Función para cargar los datos en las tablas
 document.addEventListener('DOMContentLoaded', async function() {
     try {
@@ -107,7 +161,27 @@ document.addEventListener('DOMContentLoaded', async function() {
         
     } catch (error) {
         console.error("Error al cargar datos:", error);
-        alert("Hubo un error al cargar los datos. Por favor, intenta nuevamente.");
+        
+        // Extraer información más específica del error
+        let mensajeError = "Hubo un error al cargar los datos.";
+        
+        // Extraer mensaje específico si existe
+        if (error.message) {
+            mensajeError += " Causa: " + error.message;
+        }
+        
+        // Si es un error de red, indicarlo
+        if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+            mensajeError = "Error de conexión: No se pudo conectar al servidor. Verifique que el servidor esté en ejecución.";
+        }
+        
+        // Si es un error CORS
+        if (error.message && error.message.includes('CORS')) {
+            mensajeError = "Error de permisos CORS: No se puede acceder al servidor desde este origen.";
+        }
+        
+        // Mostrar el mensaje con detalles
+        mostrarMensajeSistema('error', mensajeError);
     }
 });
 
@@ -310,6 +384,8 @@ function cargarTablaPersonal(datos) {
         fila.insertCell(2).textContent = empleado.apellido;
         fila.insertCell(3).textContent = empleado.email;
         fila.insertCell(4).textContent = empleado.rol;
+        // Mostrar la sucursal o "Global" si no tiene sucursal asignada
+        fila.insertCell(5).textContent = empleado.sucursalNombre || "Global";
     });
 }
 
@@ -414,12 +490,24 @@ async function verDetalleOrden(ordenId) {
             document.getElementById('detalleOrden').style.display = 'block';
             
         } else {
-            alert('No se encontraron detalles para esta orden');
+            mostrarMensajeSistema('error', 'No se encontraron detalles para esta orden');
         }
         
     } catch (error) {
         console.error('Error al obtener detalles de la orden:', error);
-        alert('Error al cargar los detalles de la orden. Por favor, intente nuevamente.');
+        
+        let mensajeError = 'Error al cargar los detalles de la orden.';
+        let detallesError = '';
+        
+        if (error.message) {
+            detallesError = `Detalles técnicos: ${error.message}`;
+        }
+        
+        if (error.response && error.response.status) {
+            detallesError += ` (Código de estado: ${error.response.status})`;
+        }
+        
+        mostrarMensajeSistema('error', mensajeError, 7000, detallesError);
     }
 }
 
@@ -797,7 +885,7 @@ function inicializarFormularioPedido() {
             
             // Validar que hay al menos un producto
             if (productos.length === 0) {
-                alert('Por favor, seleccione al menos un producto para el pedido.');
+                mostrarMensajeSistema('error', 'Por favor, seleccione al menos un producto para el pedido.');
                 return;
             }
             
@@ -822,7 +910,7 @@ function inicializarFormularioPedido() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Pedido creado correctamente');
+                mostrarMensajeSistema('success', 'Pedido creado correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formPedido').reset();
@@ -850,12 +938,13 @@ function inicializarFormularioPedido() {
                 // Resetear el total
                 document.getElementById('pedidoTotal').value = '';
             } else {
-                alert('Error al crear pedido: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al crear pedido: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar pedido:', error);
-            alert('Error al crear pedido. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al crear pedido.', 5000, detalleError);
         }
     });
 }
@@ -953,7 +1042,7 @@ function inicializarFormularioProducto() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Producto agregado correctamente');
+                mostrarMensajeSistema('success', 'Producto agregado correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formProducto').reset();
@@ -973,12 +1062,13 @@ function inicializarFormularioProducto() {
                     });
                 }
             } else {
-                alert('Error al agregar producto: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al agregar producto: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar producto:', error);
-            alert('Error al agregar producto. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al agregar producto.', 5000, detalleError);
         }
     });
 }
@@ -1014,7 +1104,7 @@ function inicializarFormularioSucursal() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Sucursal agregada correctamente');
+                mostrarMensajeSistema('success', 'Sucursal agregada correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formSucursal').reset();
@@ -1050,12 +1140,13 @@ function inicializarFormularioSucursal() {
                     });
                 }
             } else {
-                alert('Error al agregar sucursal: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al agregar sucursal: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar sucursal:', error);
-            alert('Error al agregar sucursal. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al agregar sucursal.', 5000, detalleError);
         }
     });
 }
@@ -1091,7 +1182,7 @@ function inicializarFormularioCliente() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Cliente agregado correctamente');
+                mostrarMensajeSistema('success', 'Cliente agregado correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formCliente').reset();
@@ -1116,12 +1207,13 @@ function inicializarFormularioCliente() {
                     });
                 }
             } else {
-                alert('Error al agregar cliente: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al agregar cliente: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar cliente:', error);
-            alert('Error al agregar cliente. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al agregar cliente.', 5000, detalleError);
         }
     });
 }
@@ -1153,7 +1245,7 @@ function inicializarFormularioCategoria() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Categoría agregada correctamente');
+                mostrarMensajeSistema('success', 'Categoría agregada correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formCategoria').reset();
@@ -1176,12 +1268,13 @@ function inicializarFormularioCategoria() {
                     });
                 }
             } else {
-                alert('Error al agregar categoría: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al agregar categoría: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar categoría:', error);
-            alert('Error al agregar categoría. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al agregar categoría.', 5000, detalleError);
         }
     });
 }
@@ -1228,18 +1321,19 @@ function inicializarFormularioEmpleado() {
             const resultado = await respuesta.json();
             
             if (resultado.success) {
-                alert('Empleado agregado correctamente');
+                mostrarMensajeSistema('success', 'Empleado agregado correctamente');
                 
                 // Limpiar formulario
                 document.getElementById('formEmpleado').reset();
                 
             } else {
-                alert('Error al agregar empleado: ' + (resultado.error || 'Error desconocido'));
+                mostrarMensajeSistema('error', 'Error al agregar empleado: ' + (resultado.error || 'Error desconocido'));
             }
             
         } catch (error) {
             console.error('Error al enviar empleado:', error);
-            alert('Error al agregar empleado. Por favor, intente nuevamente.');
+            let detalleError = error.message || 'Error en la conexión con el servidor';
+            mostrarMensajeSistema('error', 'Error al agregar empleado.', 5000, detalleError);
         }
     });
 }

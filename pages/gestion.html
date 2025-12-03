@@ -271,15 +271,26 @@
                         <input type="text" id="empleadoApellido" required>
                     </div>
                     <div class="form-group">
-                        <label for="empleadoCargo">Cargo:</label>
-                        <input type="text" id="empleadoCargo" required>
+                        <label for="empleadoEmail">Email:</label>
+                        <input type="email" id="empleadoEmail" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="empleadoRol">Rol:</label>
+                        <select id="empleadoRol" required>
+                            <option value="">Seleccione un rol</option>
+                            <option value="1">Administrador</option>
+                            <option value="2">Gerente</option>
+                            <option value="3">Vendedor</option>
+                            <option value="4">Soporte</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="empleadoSucursal">Sucursal:</label>
-                        <select id="empleadoSucursal" required>
+                        <select id="empleadoSucursal">
                             <option value="">Seleccione una sucursal</option>
                             <!-- Se cargará dinámicamente -->
                         </select>
+                        <small>Opcional para administradores globales</small>
                     </div>
                     <div class="form-group">
                         <button type="submit">Agregar Empleado</button>

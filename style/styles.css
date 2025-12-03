@@ -40,14 +40,14 @@ nav ul li a {
     transition: background-color 0.3s;
 }
 
-nav ul li a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+nav ul li a:hover, nav ul li a.active {
+    background-color: #0055a5;
 }
 
 main {
+    padding: 2rem;
     max-width: 1200px;
-    margin: 2rem auto;
-    padding: 0 1rem;
+    margin: 0 auto;
 }
 
 section {
@@ -55,170 +55,84 @@ section {
     border-radius: 8px;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
     color: #0066cc;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #0066cc;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid #e0e0e0;
 }
 
 h3 {
-    color: #333;
+    color: #444;
     margin-bottom: 1rem;
 }
 
-/* Estilos para el panel de control */
-.dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.dashboard-card {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    text-align: center;
-    transition: transform 0.3s;
-}
-
-.dashboard-card:nth-child(1) {
-    border-top: 4px solid #4CAF50;
-}
-
-.dashboard-card:nth-child(2) {
-    border-top: 4px solid #2196F3;
-}
-
-.dashboard-card:nth-child(3) {
-    border-top: 4px solid #FF9800;
-}
-
-.dashboard-card:nth-child(4) {
-    border-top: 4px solid #FF9800;
-}
-
-.dashboard-card:nth-child(5) {
-    border-top: 4px solid #E91E63;
-}
-
-.dashboard-card:nth-child(6) {
-    border-top: 4px solid #9C27B0;
-}
-
-.dashboard-card:hover {
-    transform: translateY(-5px);
-}
-
-.dashboard-value {
-    font-size: 2rem;
-    font-weight: bold;
-    margin-top: 0.5rem;
-}
-
-/* Estilos para las tablas */
-.search-container {
-    display: flex;
-    margin-bottom: 1rem;
-}
-
-.search-container input {
-    flex-grow: 1;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px 0 0 4px;
-    outline: none;
-}
-
-.search-container button {
-    background-color: #0066cc;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.search-container button:hover {
-    background-color: #0055a5;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #e0e0e0;
-}
-
-th {
-    background-color: #f5f5f5;
-    font-weight: bold;
-}
-
-tr:hover {
-    background-color: #f9f9f9;
-}
-
-/* Estilos para el footer */
 footer {
-    background-color: #333;
+    background-color: #0066cc;
     color: white;
     text-align: center;
     padding: 1rem;
     margin-top: 2rem;
 }
 
-/* Estilos para los formularios */
-.tabs {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 1.5rem;
+/* Estilos para tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+}
+
+table th, table td {
+    padding: 0.75rem;
     border-bottom: 1px solid #ddd;
 }
 
-.tab-btn {
-    background-color: #f5f5f5;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-right: 0.25rem;
-    margin-bottom: -1px;
-    border-radius: 4px 4px 0 0;
+table th {
+    background-color: #f2f2f2;
     font-weight: bold;
+    text-align: left;
 }
 
-.tab-btn:hover {
-    background-color: #e0e0e0;
+table tbody tr:hover {
+    background-color: #f5f5f5;
 }
 
-.tab-btn.active {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-bottom: 1px solid #fff;
+/* Estilos para el panel de control */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
-.tab-content {
-    display: none;
-    padding: 1.5rem 0;
+.dashboard-card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
-.tab-content.active {
-    display: block;
+.dashboard-card h3 {
+    color: #0066cc;
+}
+
+.dashboard-value {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #0055a5;
+    margin: 1rem 0;
+}
+
+/* Estilos para formularios */
+form {
+    width: 100%;
 }
 
 .form-group {
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
 }
 
 label {
@@ -229,13 +143,23 @@ label {
 
 input[type="text"],
 input[type="email"],
+input[type="password"],
 input[type="number"],
-select {
+select,
+textarea {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #0066cc;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.25);
 }
 
 button {
@@ -246,6 +170,7 @@ button {
     border-radius: 4px;
     cursor: pointer;
     font-size: 1rem;
+    font-weight: bold;
     transition: background-color 0.3s;
 }
 
@@ -253,30 +178,81 @@ button:hover {
     background-color: #0055a5;
 }
 
+/* Estilos para búsqueda */
+.search-container {
+    display: flex;
+    margin-bottom: 1.5rem;
+}
+
+.search-container input[type="text"] {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+}
+
+.search-container button {
+    border-radius: 0 4px 4px 0;
+}
+
+/* Estilos para pestañas */
+.tabs {
+    display: flex;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #ddd;
+    overflow-x: auto;
+}
+
+.tab-btn {
+    padding: 0.75rem 1.5rem;
+    background-color: transparent;
+    color: #333;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s;
+}
+
+.tab-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.tab-btn.active {
+    color: #0066cc;
+    border-bottom: 2px solid #0066cc;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Estilos para botones de acción */
 .btn-ver-detalle {
-    background-color: #4CAF50;
-    padding: 0.5rem;
-    font-size: 0.85rem;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
 }
 
 .btn-ver-detalle:hover {
-    background-color: #3e8e41;
+    background-color: #0055a5;
 }
 
-.btn-cerrar {
-    background-color: #9E9E9E;
-    margin-top: 1rem;
-}
-
-.btn-cerrar:hover {
-    background-color: #757575;
-}
-
+/* Estilos para agregado de productos */
 .producto-item {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
 }
 
 .producto-select {
@@ -288,13 +264,31 @@ button:hover {
 }
 
 .remove-producto {
-    background-color: #f44336;
-    padding: 0.5rem;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.remove-producto:hover {
+    background-color: #c82333;
 }
 
 #agregarProducto {
     background-color: #4CAF50;
-    margin-top: 0.5rem;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
 }
 
 #agregarProducto:hover {
@@ -347,28 +341,69 @@ button:hover {
     }
     
     .dashboard-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
-    
-    table {
-        font-size: 0.9rem;
-    }
+}
 
-    .tabs {
-        flex-direction: column;
-    }
+/* Estilos para mensajes de estado */
+.estado-mensaje {
+    padding: 10px 15px;
+    border-radius: 5px;
+    margin: 10px 0;
+    font-weight: bold;
+    text-align: center;
+    transition: opacity 0.5s ease-in-out;
+}
 
-    .tab-btn {
-        width: 100%;
-        margin-bottom: 0.25rem;
-        border-radius: 4px;
-    }
+.estado-mensaje.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
 
-    .tab-btn.active {
-        border-bottom: 1px solid #ddd;
-    }
-    
-    .detalle-info {
-        grid-template-columns: 1fr;
-    }
+.estado-mensaje.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.estado-mensaje.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Ajustes adicionales para mensajes en páginas principales */
+#mensajeSistema {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto 15px auto;
+    position: relative;
+}
+
+/* Estilos para los detalles de mensajes de error */
+.mensaje-detalles {
+    font-size: 0.9rem;
+    margin-top: 8px;
+    color: #5a1616;
+    font-weight: normal;
+}
+
+.mensaje-footer {
+    margin-top: 10px;
+    text-align: right;
+}
+
+.btn-detalles {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.btn-detalles:hover {
+    background-color: #5a6268;
 }

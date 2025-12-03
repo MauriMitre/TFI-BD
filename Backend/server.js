@@ -99,6 +99,19 @@ app.get('/api/personal', (req, res) => {
   });
 });
 
+// Endpoint para obtener roles de personal
+app.get('/api/roles-personal', (req, res) => {
+  connection.query('SELECT id_Rol AS id, nombre FROM rol_personal ORDER BY nombre', (err, results) => {
+    if (err) {
+      console.error('Error al obtener roles de personal:', err);
+      res.status(500).json({ error: 'Error al obtener roles de personal' });
+      return;
+    }
+    // Como no es un procedimiento almacenado, los resultados vienen directamente
+    res.json(results);
+  });
+});
+
 // Endpoint para obtener todas las órdenes de compra
 app.get('/api/ordenesCompra', (req, res) => {
   connection.query('CALL sp_obtener_ordenes_compra()', (err, results) => {
@@ -182,10 +195,34 @@ app.get('/api/metodosPago', (req, res) => {
 
 // Endpoint para crear nuevo personal
 app.post('/api/personal/nuevo', (req, res) => {
-  const { nombre, apellido, cargo, sucursal_id } = req.body;
+  console.log('Datos recibidos en /api/personal/nuevo:', req.body);
   
-  connection.query('CALL sp_crear_personal(?, ?, ?, ?)', 
-    [nombre, apellido, cargo, sucursal_id], 
+  const { nombre, apellido, email, rol_id, sucursal_id } = req.body;
+  
+  // Validación explícita para email
+  if (!email) {
+    console.error('Error: No se recibió un email válido');
+    return res.status(400).json({ success: false, error: 'El email es obligatorio' });
+  }
+  
+  // Asegurarnos de que sucursal_id sea null explícito si no viene
+  const sucursalIdParam = sucursal_id === '' ? null : sucursal_id;
+  
+  console.log('Creando nuevo personal:', { nombre, apellido, email, rol_id, sucursal_id: sucursalIdParam });
+  
+  // Importante: Asegurarnos de enviar los 5 parámetros aunque algunos sean null
+  // Convertir cada parámetro a string y confirmar que estén definidos
+  const params = [
+    String(nombre || ''),
+    String(apellido || ''),
+    String(email || ''),
+    String(rol_id || ''),
+    sucursalIdParam === null ? null : String(sucursalIdParam || '')
+  ];
+  
+  console.log('Parámetros para SP (sp_crear_personal):', params);
+  
+  connection.query('CALL sp_crear_personal(?, ?, ?, ?, ?)', params, 
     (err, results) => {
       if (err) {
         console.error('Error al llamar al procedimiento sp_crear_personal:', err);
@@ -723,6 +760,249 @@ app.post('/api/clientes/nuevo', (req, res) => {
   );
 });
 
+// ===== ENDPOINTS PARA ACTUALIZACIÓN (PUT) =====
+
+// Endpoint para actualizar categoría
+app.put('/api/categorias/actualizar', (req, res) => {
+  const { id, nombre, descripcion } = req.body;
+  
+  if (!id || !nombre) {
+    return res.status(400).json({ success: false, error: 'Se requiere ID y nombre de categoría' });
+  }
+  
+  connection.query('CALL sp_actualizar_categoria(?, ?, ?)', 
+    [id, nombre, descripcion], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar categoría:', err);
+        
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, error: 'Ya existe una categoría con ese nombre' });
+        }
+        
+        return res.status(500).json({ success: false, error: 'Error al actualizar categoría', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Categoría actualizada correctamente' });
+    }
+  );
+});
+
+// Endpoint para actualizar producto
+app.put('/api/productos/actualizar', (req, res) => {
+  const { id, nombre, categoria_id, sku, precio, estado } = req.body;
+  
+  if (!id || !nombre || !categoria_id || !sku || !precio || !estado) {
+    return res.status(400).json({ success: false, error: 'Faltan datos requeridos del producto' });
+  }
+  
+  connection.query('CALL sp_actualizar_producto(?, ?, ?, ?, ?, ?)', 
+    [id, nombre, categoria_id, sku, precio, estado], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar producto:', err);
+        
+        if (err.code === 'ER_DUP_ENTRY') {
+          if (err.message.includes('uq_producto_sku')) {
+            return res.status(409).json({ success: false, error: 'Ya existe un producto con ese SKU' });
+          } else if (err.message.includes('uq_producto_nombre')) {
+            return res.status(409).json({ success: false, error: 'Ya existe un producto con ese nombre' });
+          }
+        }
+        
+        return res.status(500).json({ success: false, error: 'Error al actualizar producto', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Producto actualizado correctamente' });
+    }
+  );
+});
+
+// Endpoint para actualizar sucursal
+app.put('/api/sucursales/actualizar', (req, res) => {
+  const { id, nombre, direccion, provincia, telefono } = req.body;
+  
+  if (!id || !nombre || !direccion || !provincia) {
+    return res.status(400).json({ success: false, error: 'Faltan datos requeridos de la sucursal' });
+  }
+  
+  connection.query('CALL sp_actualizar_sucursal(?, ?, ?, ?, ?)', 
+    [id, nombre, direccion, provincia, telefono], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar sucursal:', err);
+        
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, error: 'Ya existe una sucursal con ese nombre' });
+        }
+        
+        return res.status(500).json({ success: false, error: 'Error al actualizar sucursal', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Sucursal actualizada correctamente' });
+    }
+  );
+});
+
+// Endpoint para actualizar cliente
+app.put('/api/clientes/actualizar', (req, res) => {
+  const { id, nombre, apellido, email, telefono } = req.body;
+  
+  if (!id || !nombre || !apellido || !email) {
+    return res.status(400).json({ success: false, error: 'Faltan datos requeridos del cliente' });
+  }
+  
+  connection.query('CALL sp_actualizar_cliente(?, ?, ?, ?, ?)', 
+    [id, nombre, apellido, email, telefono], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar cliente:', err);
+        
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, error: 'Ya existe un cliente con ese email' });
+        }
+        
+        return res.status(500).json({ success: false, error: 'Error al actualizar cliente', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Cliente actualizado correctamente' });
+    }
+  );
+});
+
+// Endpoint para actualizar empleado/personal
+app.put('/api/personal/actualizar', (req, res) => {
+  const { id, nombre, apellido, email, rol_id, sucursal_id } = req.body;
+  
+  if (!id || !nombre || !apellido || !email || !rol_id) {
+    return res.status(400).json({ success: false, error: 'Faltan datos requeridos del empleado' });
+  }
+  
+  connection.query('CALL sp_actualizar_personal(?, ?, ?, ?, ?, ?)', 
+    [id, nombre, apellido, email, rol_id, sucursal_id], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar empleado:', err);
+        
+        if (err.code === 'ER_DUP_ENTRY') {
+          return res.status(409).json({ success: false, error: 'Ya existe un empleado con ese email' });
+        }
+        
+        return res.status(500).json({ success: false, error: 'Error al actualizar empleado', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Empleado actualizado correctamente' });
+    }
+  );
+});
+
+// Endpoint para actualizar pedido
+app.put('/api/pedidos/actualizar', (req, res) => {
+  const { id, cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id } = req.body;
+  
+  if (!id || !cliente_id || !sucursalOrigen_id || !fecha || !total || !estado) {
+    return res.status(400).json({ success: false, error: 'Faltan datos requeridos del pedido' });
+  }
+  
+  connection.query('CALL sp_actualizar_pedido(?, ?, ?, ?, ?, ?, ?, ?)', 
+    [id, cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id], 
+    (err, results) => {
+      if (err) {
+        console.error('Error al actualizar pedido:', err);
+        return res.status(500).json({ success: false, error: 'Error al actualizar pedido', details: err.message });
+      }
+      
+      res.json({ success: true, message: 'Pedido actualizado correctamente' });
+    }
+  );
+});
+
+// ===== ENDPOINTS PARA ELIMINACIÓN (DELETE) =====
+
+// Endpoint para eliminar categoría
+app.delete('/api/categorias/eliminar/:id', (req, res) => {
+  const categoriaId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_categoria(?)', [categoriaId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar categoría:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar categoría', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Categoría eliminada correctamente' });
+  });
+});
+
+// Endpoint para eliminar producto
+app.delete('/api/productos/eliminar/:id', (req, res) => {
+  const productoId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_producto(?)', [productoId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar producto:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar producto', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Producto eliminado correctamente' });
+  });
+});
+
+// Endpoint para eliminar sucursal
+app.delete('/api/sucursales/eliminar/:id', (req, res) => {
+  const sucursalId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_sucursal(?)', [sucursalId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar sucursal:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar sucursal', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Sucursal eliminada correctamente' });
+  });
+});
+
+// Endpoint para eliminar cliente
+app.delete('/api/clientes/eliminar/:id', (req, res) => {
+  const clienteId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_cliente(?)', [clienteId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar cliente:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar cliente', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Cliente eliminado correctamente' });
+  });
+});
+
+// Endpoint para eliminar empleado
+app.delete('/api/personal/eliminar/:id', (req, res) => {
+  const empleadoId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_personal(?)', [empleadoId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar empleado:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar empleado', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Empleado eliminado correctamente' });
+  });
+});
+
+// Endpoint para eliminar pedido
+app.delete('/api/pedidos/eliminar/:id', (req, res) => {
+  const pedidoId = req.params.id;
+  
+  connection.query('CALL sp_eliminar_pedido(?)', [pedidoId], (err, results) => {
+    if (err) {
+      console.error('Error al eliminar pedido:', err);
+      return res.status(500).json({ success: false, error: 'Error al eliminar pedido', details: err.message });
+    }
+    
+    res.json({ success: true, message: 'Pedido eliminado correctamente' });
+  });
+});
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor corriendo en http://localhost:${port}`);
@@ -739,4 +1019,16 @@ app.listen(port, () => {
   console.log(`- sp_obtener_orden_pago(orden_id)`);
   console.log(`- sp_obtener_transaccion_cripto(pago_id)`);
   console.log(`- sp_obtener_metodos_pago()`);
+  console.log(`- sp_actualizar_categoria(id, nombre, descripcion)`);
+  console.log(`- sp_actualizar_producto(id, nombre, categoria_id, sku, precio, estado)`);
+  console.log(`- sp_actualizar_sucursal(id, nombre, direccion, provincia, telefono)`);
+  console.log(`- sp_actualizar_cliente(id, nombre, apellido, email, telefono)`);
+  console.log(`- sp_actualizar_personal(id, nombre, apellido, email, rol_id, sucursal_id)`);
+  console.log(`- sp_actualizar_pedido(id, cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id)`);
+  console.log(`- sp_eliminar_categoria(id)`);
+  console.log(`- sp_eliminar_producto(id)`);
+  console.log(`- sp_eliminar_sucursal(id)`);
+  console.log(`- sp_eliminar_cliente(id)`);
+  console.log(`- sp_eliminar_personal(id)`);
+  console.log(`- sp_eliminar_pedido(id)`);
 });
