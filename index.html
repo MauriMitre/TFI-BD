@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión</title>
     <link rel="stylesheet" href="style/styles.css">
 </head>
+
 <body>
     <header>
         <h1>Sistema de Gestión de Productos y Pedidos</h1>
@@ -18,16 +20,22 @@
                 <li><a href="#ordenes-compra">Órdenes</a></li>
                 <li><a href="#clientes">Clientes</a></li>
                 <li><a href="#personal">Personal</a></li>
-                <li><a href="pages/gestion.html">Gestión</a></li>
+                <li><a href="pages/gestion.html" class="link-gestion">Gestión</a></li>
                 <li><a href="pages/modificar.html">Modificar</a></li>
             </ul>
         </nav>
+        <div class="user-info" id="userInfo" style="position: absolute; right: 20px; top: 20px; color: white;">
+            <span id="usernameDisplay"></span>
+            <span id="userRoleDisplay" style="font-size: 0.9em; opacity: 0.8;"></span>
+            <button id="btnLogout" onclick="cerrarSesion()"
+                style="margin-left: 15px; padding: 5px 10px; cursor: pointer;">Cerrar Sesión</button>
+        </div>
     </header>
 
     <main>
         <!-- Contenedor para mensajes del sistema -->
         <div id="mensajeSistema" class="estado-mensaje" style="display: none;"></div>
-        
+
         <section id="dashboard">
             <h2>Panel de Control</h2>
             <div class="dashboard-container">
@@ -73,12 +81,54 @@
                         <th>SKU</th>
                         <th>Precio</th>
                         <th>Estado</th>
+                        <th>Reseñas</th>
                     </tr>
                 </thead>
                 <tbody>
                     <!-- Los datos se cargarán con JavaScript -->
                 </tbody>
             </table>
+
+            <!-- Contenedor para reseñas de productos -->
+            <div id="detalleResenas" class="detalle-container" style="display: none;">
+                <h3>Reseñas del Producto: <span id="resena-producto-nombre"></span></h3>
+
+                <div class="resenas-lista" id="lista-resenas">
+                    <!-- Las reseñas se cargarán aquí -->
+                </div>
+
+                <div class="nueva-resena-form">
+                    <h4>Escribir una reseña</h4>
+                    <form id="formNuevaResena">
+                        <input type="hidden" id="resenaProductoId">
+                        <div class="form-group">
+                            <label for="resenaRating">Calificación:</label>
+                            <select id="resenaRating" required>
+                                <option value="5">5 Estrellas</option>
+                                <option value="4">4 Estrellas</option>
+                                <option value="3">3 Estrellas</option>
+                                <option value="2">2 Estrellas</option>
+                                <option value="1">1 Estrella</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="resenaNombre">Nombre:</label>
+                            <input type="text" id="resenaNombre" placeholder="Tu nombre (opcional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="resenaEmail">Email:</label>
+                            <input type="email" id="resenaEmail" placeholder="Tu email (opcional)">
+                        </div>
+                        <div class="form-group">
+                            <label for="resenaTexto">Comentario:</label>
+                            <textarea id="resenaTexto" rows="3" placeholder="Escribe tu opinión..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn-guardar">Enviar Reseña</button>
+                    </form>
+                </div>
+
+                <button id="cerrarResenas" class="btn-cerrar">Cerrar Reseñas</button>
+            </div>
         </section>
 
         <section id="sucursales">
@@ -225,14 +275,14 @@
                         <p><strong>Estado:</strong> <span id="orden-estado"></span></p>
                         <p><strong>Total:</strong> <span id="orden-total"></span></p>
                     </div>
-                    
+
                     <div class="detalle-seccion">
                         <h4>Información de Pago</h4>
                         <p><strong>Método:</strong> <span id="orden-metodo-pago"></span></p>
                         <p><strong>Total Pagado:</strong> <span id="orden-total-pagado"></span></p>
                         <p><strong>Moneda:</strong> <span id="orden-moneda"></span></p>
                     </div>
-                    
+
                     <div class="detalle-seccion" id="seccion-cripto" style="display: none;">
                         <h4>Detalles Criptomoneda</h4>
                         <p><strong>Moneda:</strong> <span id="cripto-moneda"></span></p>
@@ -240,7 +290,7 @@
                         <p><strong>Wallet Cliente:</strong> <span id="cripto-wallet"></span></p>
                     </div>
                 </div>
-                
+
                 <h4>Productos</h4>
                 <table id="tablaDetalleOrden">
                     <thead>
@@ -265,12 +315,36 @@
         <p>Sistema de Gestión - Trabajo Final Integrador de Bases de Datos</p>
     </footer>
 
+    <!-- Verificar sesión antes de cargar el script principal -->
+    <script>
+        // Verificar si hay una sesión activa
+        let userRole = sessionStorage.getItem('userRole');
+        let username = sessionStorage.getItem('username');
+
+        if (!userRole || !username) {
+            // No hay sesión, redirigir al login
+            window.location.href = 'login.html';
+        } else {
+            // Hay sesión, mostrar información del usuario
+            document.getElementById('usernameDisplay').textContent = username;
+            document.getElementById('userRoleDisplay').textContent = `(${userRole})`;
+        }
+
+        // Función para cerrar sesión
+        function cerrarSesion() {
+            sessionStorage.removeItem('userRole');
+            sessionStorage.removeItem('username');
+            window.location.href = 'login.html';
+        }
+    </script>
+
     <!-- Cargamos el script principal -->
     <script src="script/script.js"></script>
-    
+
     <div id="sql-console" style="display: none;">
         <h3>Consulta SQL</h3>
         <pre id="sql-query">SELECT * FROM tabla WHERE condicion</pre>
     </div>
 </body>
+
 </html>
