@@ -1,4 +1,4 @@
-﻿const express = require('express');
+const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -279,7 +279,7 @@ app.get('/api/metodosPago', (req, res) => {
 });
 
 // Endpoint para crear nuevo personal
-app.post('/api/personal/nuevo', attachRoleConnection, closeRoleConnection, (req, res) => {
+app.post('/api/personal/nuevo', (req, res) => {
   console.log('Datos recibidos en /api/personal/nuevo:', req.body);
 
   const { nombre, apellido, email, rol_id, sucursal_id } = req.body;
@@ -307,19 +307,10 @@ app.post('/api/personal/nuevo', attachRoleConnection, closeRoleConnection, (req,
 
   console.log('Parámetros para SP (sp_crear_personal):', params);
 
-  req.dbConnection.query('CALL sp_crear_personal(?, ?, ?, ?, ?)', params,
+  connection.query('CALL sp_crear_personal(?, ?, ?, ?, ?)', params,
     (err, results) => {
       if (err) {
         console.error('Error al llamar al procedimiento sp_crear_personal:', err);
-        // Verificar si es un error de permisos de MySQL
-        if (err.code === 'ER_TABLEACCESS_DENIED_ERROR' || err.code === 'ER_COLUMNACCESS_DENIED_ERROR' || err.code === 'ER_PROCACCESS_DENIED_ERROR') {
-          return res.status(403).json({
-            success: false,
-            error: `Acceso denegado: El usuario '${req.userRole}' no tiene permisos para crear personal`,
-            detalles: 'Esta operación requiere permisos de escritura en la base de datos'
-          });
-        }
-
         res.status(500).json({ error: 'Error al crear personal', details: err.message });
         return;
       }
@@ -337,11 +328,11 @@ app.post('/api/personal/nuevo', attachRoleConnection, closeRoleConnection, (req,
 });
 
 // Endpoint para crear nueva orden de compra
-app.post('/api/ordenesCompra/nueva', attachRoleConnection, closeRoleConnection, (req, res) => {
+app.post('/api/ordenesCompra/nueva', (req, res) => {
   const { cliente_id, sucursal_id, fecha, total, estado, metodo_id, moneda } = req.body;
 
   // Iniciamos una transacción para asegurar consistencia
-  req.dbConnection.beginTransaction(err => {
+  connection.beginTransaction(err => {
     if (err) {
       console.error('Error al iniciar transacción:', err);
       res.status(500).json({ error: 'Error al iniciar la transacción', details: err.message });
@@ -349,21 +340,12 @@ app.post('/api/ordenesCompra/nueva', attachRoleConnection, closeRoleConnection, 
     }
 
     // Paso 1: Crear la orden de compra
-    req.dbConnection.query('CALL sp_crear_orden(?, ?, ?, ?, ?, ?, ?)',
+    connection.query('CALL sp_crear_orden(?, ?, ?, ?, ?, ?, ?)',
       [cliente_id, sucursal_id, fecha, total, 'Web', estado, null],
       (err, results) => {
         if (err) {
-          req.dbConnection.rollback(() => {
+          connection.rollback(() => {
             console.error('Error al crear orden, transacción cancelada:', err);
-            // Verificar si es un error de permisos de MySQL
-            if (err.code === 'ER_TABLEACCESS_DENIED_ERROR' || err.code === 'ER_COLUMNACCESS_DENIED_ERROR' || err.code === 'ER_PROCACCESS_DENIED_ERROR') {
-              return res.status(403).json({
-                success: false,
-                error: `Acceso denegado: El usuario '${req.userRole}' no tiene permisos para crear órdenes`,
-                detalles: 'Esta operación requiere permisos de escritura en la base de datos'
-              });
-            }
-
             res.status(500).json({ error: 'Error al crear orden', details: err.message });
           });
           return;
@@ -372,19 +354,19 @@ app.post('/api/ordenesCompra/nueva', attachRoleConnection, closeRoleConnection, 
         // Obtenemos el ID de la orden creada
         const ordenId = results[0][0]?.id;
         if (!ordenId) {
-          req.dbConnection.rollback(() => {
+          connection.rollback(() => {
             res.status(500).json({ error: 'No se pudo obtener el ID de la orden creada' });
           });
           return;
         }
 
         // Paso 2: Crear la orden de pago asociada usando el SP sp_crear_orden_pago
-        req.dbConnection.query(
+        connection.query(
           'CALL sp_crear_orden_pago(?, ?, ?, ?)',
           [ordenId, metodo_id, total, moneda],
           (err, pagoResult) => {
             if (err) {
-              req.dbConnection.rollback(() => {
+              connection.rollback(() => {
                 console.error('Error al crear pago, transacción cancelada:', err);
                 res.status(500).json({ error: 'Error al crear pago', details: err.message });
               });
@@ -394,9 +376,9 @@ app.post('/api/ordenesCompra/nueva', attachRoleConnection, closeRoleConnection, 
             const pagoId = pagoResult[0][0]?.id;
 
             // Todo salió bien, confirmamos la transacción
-            req.dbConnection.commit(err => {
+            connection.commit(err => {
               if (err) {
-                req.dbConnection.rollback(() => {
+                connection.rollback(() => {
                   console.error('Error al confirmar transacción:', err);
                   res.status(500).json({ error: 'Error al confirmar la transacción', details: err.message });
                 });
@@ -419,7 +401,7 @@ app.post('/api/ordenesCompra/nueva', attachRoleConnection, closeRoleConnection, 
 });
 
 // Endpoint para añadir productos a una orden existente
-app.post('/api/ordenesCompra/:id/productos', attachRoleConnection, closeRoleConnection, (req, res) => {
+app.post('/api/ordenesCompra/:id/productos', (req, res) => {
   const ordenId = req.params.id;
   const productos = req.body.productos;
 
@@ -433,7 +415,7 @@ app.post('/api/ordenesCompra/:id/productos', attachRoleConnection, closeRoleConn
   }
 
   // Iniciamos una transacción para asegurar consistencia
-  req.dbConnection.beginTransaction(err => {
+  connection.beginTransaction(err => {
     if (err) {
       console.error('Error al iniciar transacción:', err);
       res.status(500).json({ error: 'Error al iniciar la transacción', details: err.message });
@@ -444,17 +426,11 @@ app.post('/api/ordenesCompra/:id/productos', attachRoleConnection, closeRoleConn
     const insertPromises = productos.map(producto => {
       return new Promise((resolve, reject) => {
         console.log(`Agregando producto ${producto.producto_id} a la orden ${ordenId}, cantidad: ${producto.cantidad}`);
-        req.dbConnection.query(
+        connection.query(
           'CALL sp_agregar_orden_producto(?, ?, ?)',
           [ordenId, producto.producto_id, producto.cantidad],
           (err, result) => {
-            if (err) {
-                // Verificar si es un error de permisos de MySQL
-                if (err.code === 'ER_TABLEACCESS_DENIED_ERROR' || err.code === 'ER_COLUMNACCESS_DENIED_ERROR' || err.code === 'ER_PROCACCESS_DENIED_ERROR') {
-                    err.isPermissionError = true;
-                }
-                reject(err);
-            }
+            if (err) reject(err);
             else resolve(result);
           }
         );
@@ -465,9 +441,9 @@ app.post('/api/ordenesCompra/:id/productos', attachRoleConnection, closeRoleConn
     Promise.all(insertPromises)
       .then(results => {
         // Todas las inserciones tuvieron éxito, confirmamos la transacción
-        req.dbConnection.commit(err => {
+        connection.commit(err => {
           if (err) {
-            req.dbConnection.rollback(() => {
+            connection.rollback(() => {
               console.error('Error al confirmar transacción:', err);
               res.status(500).json({ error: 'Error al confirmar la transacción', details: err.message });
             });
@@ -484,25 +460,16 @@ app.post('/api/ordenesCompra/:id/productos', attachRoleConnection, closeRoleConn
       })
       .catch(err => {
         // Alguna inserción falló, revertimos la transacción
-        req.dbConnection.rollback(() => {
+        connection.rollback(() => {
           console.error('Error al añadir productos, transacción cancelada:', err);
-          
-          if (err.isPermissionError) {
-             return res.status(403).json({
-                success: false,
-                error: 'Acceso denegado: El usuario ${req.userRole}no tiene permisos para añadir productos a la orden',
-                detalles: 'Esta operación requiere permisos de escritura en la base de datos'
-              });
-          }
-
           res.status(500).json({ error: 'Error al añadir productos', details: err.message });
         });
       });
   });
 });
 
-// Endpoint para crear nuevo producto - MySQL rechaza si el usuario no tiene permisos INSERT
-app.post('/api/productos/nuevo', attachRoleConnection, closeRoleConnection, (req, res) => {
+// Endpoint para crear nuevo producto
+app.post('/api/productos/nuevo', (req, res) => {
   const { nombre, categoria_id, sku, precio, estado } = req.body;
 
   // Validación básica
@@ -513,21 +480,11 @@ app.post('/api/productos/nuevo', attachRoleConnection, closeRoleConnection, (req
     });
   }
 
-  // Usar la conexión del rol del usuario - MySQL rechazará si no tiene permisos
-  req.dbConnection.query('CALL sp_crear_producto(?, ?, ?, ?, ?)',
+  connection.query('CALL sp_crear_producto(?, ?, ?, ?, ?)',
     [nombre, categoria_id, sku, precio, estado],
     (err, results) => {
       if (err) {
         console.error('Error al llamar al procedimiento sp_crear_producto:', err);
-
-        // Verificar si es un error de permisos de MySQL
-        if (err.code === 'ER_TABLEACCESS_DENIED_ERROR' || err.code === 'ER_COLUMNACCESS_DENIED_ERROR') {
-          return res.status(403).json({
-            success: false,
-            error: `Acceso denegado: El usuario '${req.userRole}' no tiene permisos para crear productos`,
-            detalles: 'Esta operación requiere permisos de escritura en la base de datos'
-          });
-        }
 
         // Verificar si es un error por SKU o nombre duplicado
         if (err.code === 'ER_DUP_ENTRY') {
