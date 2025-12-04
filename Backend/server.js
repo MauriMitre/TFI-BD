@@ -468,8 +468,8 @@ app.post('/api/ordenesCompra/:id/productos', (req, res) => {
   });
 });
 
-// Endpoint para crear nuevo producto
-app.post('/api/productos/nuevo', (req, res) => {
+// Endpoint para crear nuevo producto - MySQL rechaza si el usuario no tiene permisos INSERT
+app.post('/api/productos/nuevo', attachRoleConnection, closeRoleConnection, (req, res) => {
   const { nombre, categoria_id, sku, precio, estado } = req.body;
 
   // Validación básica
@@ -480,25 +480,20 @@ app.post('/api/productos/nuevo', (req, res) => {
     });
   }
 
-  connection.query('CALL sp_crear_producto(?, ?, ?, ?, ?)',
+  // Usar la conexión del rol del usuario - MySQL rechazará si no tiene permisos
+  req.dbConnection.query('CALL sp_crear_producto(?, ?, ?, ?, ?)',
     [nombre, categoria_id, sku, precio, estado],
     (err, results) => {
       if (err) {
         console.error('Error al llamar al procedimiento sp_crear_producto:', err);
 
-        // Verificar si es un error por SKU o nombre duplicado
-        if (err.code === 'ER_DUP_ENTRY') {
-          if (err.message.includes('sku')) {
-            return res.status(409).json({
-              success: false,
-              error: 'Ya existe un producto con ese SKU'
-            });
-          } else if (err.message.includes('nombre')) {
-            return res.status(409).json({
-              success: false,
-              error: 'Ya existe un producto con ese nombre'
-            });
-          }
+        // Verificar si es un error de permisos de MySQL
+        if (err.code === 'ER_TABLEACCESS_DENIED_ERROR' || err.code === 'ER_COLUMNACCESS_DENIED_ERROR') {
+          return res.status(403).json({
+            success: false,
+            error: `Acceso denegado: El usuario '${req.userRole}' no tiene permisos para crear productos`,
+            detalles: 'Esta operación requiere permisos de escritura en la base de datos'
+          });
         }
 
         return res.status(500).json({
