@@ -68,3 +68,45 @@ VALUES (125, 1, 1, NOW(), 8500.00, 'WEB', 'ENTREGADA', 1);
 -- Asumimos transportista 2 (Andreani) para variar.
 INSERT INTO envio (orden_id, direccion_id, transportista_id, costo, trackingCode, estado, personal_id)
 VALUES (125, 1, 2, 1200.00, 'TRACK0125', 'ENTREGADO', 1);
+
+-- 6) Top 5 Productos más vendidos
+-- Insertamos productos y órdenes con cantidades altas
+INSERT INTO producto (categoria_id, Nombre, SKU, Precio_Lista, Estado, fechaAlta) VALUES (1, 'Producto Top 1', 'TOP1', 10000.00, 'Disponible', NOW());
+SET @id_prod_top1 = LAST_INSERT_ID();
+INSERT INTO producto (categoria_id, Nombre, SKU, Precio_Lista, Estado, fechaAlta) VALUES (1, 'Producto Top 2', 'TOP2', 5000.00, 'Disponible', NOW());
+SET @id_prod_top2 = LAST_INSERT_ID();
+
+INSERT INTO orden_de_compra (cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id) VALUES (1, 1, NOW(), 500000.00, 'WEB', 'PAGADA', 1);
+SET @id_orden_top = LAST_INSERT_ID();
+
+INSERT INTO orden_producto (orden_id, producto_id, cantidad, precio_unitario) VALUES (@id_orden_top, @id_prod_top1, 50, 10000.00); -- 500k
+INSERT INTO orden_producto (orden_id, producto_id, cantidad, precio_unitario) VALUES (@id_orden_top, @id_prod_top2, 20, 5000.00); -- 100k
+
+-- 7) Ranking de Clientes
+-- Creamos un cliente "VIP" que gasta mucho
+INSERT INTO cliente (nombre, apellido, email, telefono) VALUES ('Ricardo', 'Fort', 'ricky@miameee.com', '11111111');
+SET @id_cliente_vip = LAST_INSERT_ID();
+
+INSERT INTO orden_de_compra (cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id) 
+VALUES (@id_cliente_vip, 1, NOW(), 1000000.00, 'WEB', 'PAGADA', 1);
+
+-- 8) Preferencias de Métodos de Pago
+-- Insertamos pagos variados
+-- Asumimos IDs de métodos de pago: 1 (Visa), 2 (Cripto), 3 (Transferencia)
+INSERT INTO orden_de_pago (orden_id, metodo_id, total_pagado, moneda) VALUES (@id_orden_top, 1, 500000.00, 'ARS');
+INSERT INTO orden_de_pago (orden_id, metodo_id, total_pagado, moneda) VALUES (@id_orden_devolucion, 3, 5000.00, 'ARS');
+-- Pago cripto para el cliente VIP
+INSERT INTO orden_de_pago (orden_id, metodo_id, total_pagado, moneda) VALUES (LAST_INSERT_ID(), 2, 1000000.00, 'USDT');
+
+-- 9) Alerta de Stock Crítico
+-- Insertamos un producto con muy poco stock
+INSERT INTO producto (categoria_id, Nombre, SKU, Precio_Lista, Estado, fechaAlta) VALUES (1, 'Producto Escaso', 'LOWSTOCK', 500.00, 'Disponible', NOW());
+SET @id_prod_low = LAST_INSERT_ID();
+INSERT INTO stocksucursal (producto_id, sucursal_id, cantidad) VALUES (@id_prod_low, 1, 2);
+INSERT INTO stocksucursal (producto_id, sucursal_id, cantidad) VALUES (@id_prod_low, 2, 3);
+-- Total 5 < 10
+
+-- 10) Rendimiento de Sucursales
+-- Ya hemos insertado varias órdenes para sucursal 1. Insertemos una grande para sucursal 2.
+INSERT INTO orden_de_compra (cliente_id, sucursalOrigen_id, fecha, total, canal, estado, usuario_creacion_id) 
+VALUES (1, 2, NOW(), 750000.00, 'FISICO', 'PAGADA', 1);
